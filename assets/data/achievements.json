@@ -1,0 +1,145 @@
+{
+  "version": "1.0.0",
+  "achievements": {
+    "first_steps": {
+      "name": "初次迈步",
+      "description": "完成第一关",
+      "hidden_description": "???",
+      "type": "one_time",
+      "rarity": "common",
+      "points": 10,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "level_complete",
+      "condition_params": {
+        "level": 1
+      },
+      "is_hidden": false
+    },
+    "puzzle_novice": {
+      "name": "解谜新手",
+      "description": "解开5个谜题",
+      "hidden_description": "???",
+      "type": "progress",
+      "rarity": "common",
+      "points": 20,
+      "target_progress": 5,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "puzzle_solved",
+      "condition_params": {},
+      "is_hidden": false
+    },
+    "puzzle_master": {
+      "name": "解谜大师",
+      "description": "解开50个谜题",
+      "hidden_description": "???",
+      "type": "progress",
+      "rarity": "rare",
+      "points": 100,
+      "target_progress": 50,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "puzzle_solved",
+      "condition_params": {},
+      "is_hidden": false
+    },
+    "speed_runner": {
+      "name": "速通玩家",
+      "description": "在60秒内完成一个关卡",
+      "hidden_description": "???",
+      "type": "one_time",
+      "rarity": "uncommon",
+      "points": 30,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "level_complete_time",
+      "condition_params": {
+        "time_limit": 60
+      },
+      "is_hidden": false
+    },
+    "perfectionist": {
+      "name": "完美主义者",
+      "description": "不使用任何提示完成一个关卡",
+      "hidden_description": "???",
+      "type": "one_time",
+      "rarity": "uncommon",
+      "points": 50,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "level_complete_no_hints",
+      "condition_params": {},
+      "is_hidden": false
+    },
+    "explorer": {
+      "name": "探索者",
+      "description": "完成所有关卡",
+      "hidden_description": "???",
+      "type": "progress",
+      "rarity": "epic",
+      "points": 200,
+      "target_progress": 10,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "levels_completed",
+      "condition_params": {},
+      "is_hidden": false
+    },
+    "mist_master": {
+      "name": "迷雾掌控者",
+      "description": "累计使用迷雾能力100次",
+      "hidden_description": "???",
+      "type": "cumulative",
+      "rarity": "rare",
+      "points": 80,
+      "target_progress": 100,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "mist_used",
+      "condition_params": {},
+      "is_hidden": false
+    },
+    "secret_seeker": {
+      "name": "秘密寻找者",
+      "description": "发现隐藏的秘密",
+      "hidden_description": "???",
+      "type": "hidden",
+      "rarity": "legendary",
+      "points": 500,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "secret_found",
+      "condition_params": {},
+      "is_hidden": true
+    },
+    "persistent": {
+      "name": "坚持不懈",
+      "description": "累计游戏时间达到10小时",
+      "hidden_description": "???",
+      "type": "cumulative",
+      "rarity": "uncommon",
+      "points": 50,
+      "target_progress": 36000,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "play_time",
+      "condition_params": {},
+      "is_hidden": false
+    },
+    "collector": {
+      "name": "收藏家",
+      "description": "收集所有隐藏物品",
+      "hidden_description": "???",
+      "type": "progress",
+      "rarity": "epic",
+      "points": 150,
+      "target_progress": 20,
+      "icon_locked_path": "",
+      "icon_unlocked_path": "",
+      "condition_type": "item_collected",
+      "condition_params": {},
+      "is_hidden": false
+    }
+  }
+}

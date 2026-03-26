@@ -1,0 +1,257 @@
+{
+  "version": "1.0.0",
+  "description": "迷雾绘者成就系统类型定义",
+  "achievement_types": {
+    "PROGRESS": {
+      "id": "PROGRESS",
+      "name": "进度类",
+      "description": "需要累积进度完成的成就，如收集10个物品",
+      "properties": {
+        "target_progress": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "目标进度值"
+        },
+        "current_progress": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "当前进度值"
+        }
+      }
+    },
+    "ONE_TIME": {
+      "id": "ONE_TIME",
+      "name": "一次性",
+      "description": "只需触发一次即可完成的成就，如首次完成某事",
+      "properties": {}
+    },
+    "CUMULATIVE": {
+      "id": "CUMULATIVE",
+      "name": "累积类",
+      "description": "跨存档累积的成就，如累计游玩100小时",
+      "properties": {
+        "target_progress": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "目标累积值"
+        },
+        "current_progress": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "当前累积值"
+        },
+        "persist_across_saves": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否跨存档持久化"
+        }
+      }
+    },
+    "HIDDEN": {
+      "id": "HIDDEN",
+      "name": "隐藏成就",
+      "description": "描述隐藏的成就，解锁后才显示真实内容",
+      "properties": {
+        "hidden_description": {
+          "type": "string",
+          "default": "???",
+          "description": "未解锁时的替代描述"
+        }
+      }
+    },
+    "CHAINED": {
+      "id": "CHAINED",
+      "name": "连锁成就",
+      "description": "需要按顺序完成多个条件的成就",
+      "properties": {
+        "chain_conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "order": { "type": "integer" },
+              "condition_type": { "type": "string" },
+              "condition_params": { "type": "object" }
+            }
+          },
+          "description": "连锁条件列表"
+        },
+        "current_chain_step": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "当前连锁步骤"
+        }
+      }
+    }
+  },
+  "rarity_types": {
+    "COMMON": {
+      "id": "COMMON",
+      "name": "普通",
+      "color": "#E0E0E0",
+      "points_multiplier": 1.0
+    },
+    "UNCOMMON": {
+      "id": "UNCOMMON",
+      "name": "稀有",
+      "color": "#4CAF50",
+      "points_multiplier": 1.5
+    },
+    "RARE": {
+      "id": "RARE",
+      "name": "罕见",
+      "color": "#2196F3",
+      "points_multiplier": 2.0
+    },
+    "EPIC": {
+      "id": "EPIC",
+      "name": "史诗",
+      "color": "#9C27B0",
+      "points_multiplier": 3.0
+    },
+    "LEGENDARY": {
+      "id": "LEGENDARY",
+      "name": "传说",
+      "color": "#FF9800",
+      "points_multiplier": 5.0
+    }
+  },
+  "condition_types": {
+    "LEVEL_COMPLETE": {
+      "id": "LEVEL_COMPLETE",
+      "name": "关卡完成",
+      "description": "完成指定关卡",
+      "params": {
+        "level": { "type": "integer", "description": "关卡编号" },
+        "time_limit": { "type": "integer", "optional": true, "description": "时间限制（秒）" },
+        "no_hints": { "type": "boolean", "optional": true, "description": "是否禁用提示" }
+      }
+    },
+    "LEVELS_COMPLETED": {
+      "id": "LEVELS_COMPLETED",
+      "name": "多关卡完成",
+      "description": "完成多个关卡",
+      "params": {
+        "count": { "type": "integer", "description": "完成数量" },
+        "specific_levels": { "type": "array", "items": "integer", "optional": true, "description": "特定关卡列表" }
+      }
+    },
+    "PUZZLE_SOLVED": {
+      "id": "PUZZLE_SOLVED",
+      "name": "谜题解决",
+      "description": "解决谜题",
+      "params": {
+        "puzzle_id": { "type": "string", "optional": true, "description": "特定谜题ID" },
+        "count": { "type": "integer", "optional": true, "description": "解决数量" },
+        "difficulty": { "type": "string", "optional": true, "enum": ["easy", "normal", "hard"], "description": "难度要求" }
+      }
+    },
+    "ITEM_COLLECTED": {
+      "id": "ITEM_COLLECTED",
+      "name": "物品收集",
+      "description": "收集物品",
+      "params": {
+        "item_id": { "type": "string", "optional": true, "description": "特定物品ID" },
+        "item_type": { "type": "string", "optional": true, "description": "物品类型" },
+        "count": { "type": "integer", "optional": true, "description": "收集数量" }
+      }
+    },
+    "SECRET_FOUND": {
+      "id": "SECRET_FOUND",
+      "name": "秘密发现",
+      "description": "发现隐藏秘密",
+      "params": {
+        "secret_id": { "type": "string", "optional": true, "description": "特定秘密ID" },
+        "count": { "type": "integer", "optional": true, "description": "发现数量" }
+      }
+    },
+    "MIST_USED": {
+      "id": "MIST_USED",
+      "name": "迷雾使用",
+      "description": "使用迷雾能力",
+      "params": {
+        "count": { "type": "integer", "description": "使用次数" },
+        "ability_type": { "type": "string", "optional": true, "description": "特定能力类型" }
+      }
+    },
+    "PLAY_TIME": {
+      "id": "PLAY_TIME",
+      "name": "游戏时长",
+      "description": "累计游戏时间",
+      "params": {
+        "seconds": { "type": "integer", "description": "目标秒数" }
+      }
+    },
+    "STAT_REACHED": {
+      "id": "STAT_REACHED",
+      "name": "统计达标",
+      "description": "某项统计达到目标值",
+      "params": {
+        "stat_name": { "type": "string", "description": "统计项名称" },
+        "value": { "type": "integer", "description": "目标值" }
+      }
+    },
+    "DEATH_COUNT": {
+      "id": "DEATH_COUNT",
+      "name": "死亡次数",
+      "description": "死亡特定次数（恶搞成就）",
+      "params": {
+        "count": { "type": "integer", "description": "死亡次数" }
+      }
+    },
+    "NO_DEATH_RUN": {
+      "id": "NO_DEATH_RUN",
+      "name": "无死亡通关",
+      "description": "不死亡完成特定内容",
+      "params": {
+        "level": { "type": "integer", "optional": true, "description": "特定关卡" },
+        "layers": { "type": "integer", "optional": true, "description": "层数" }
+      }
+    },
+    "COMBO_ACHIEVED": {
+      "id": "COMBO_ACHIEVED",
+      "name": "连击达成",
+      "description": "达成特定连击",
+      "params": {
+        "combo_count": { "type": "integer", "description": "连击数" },
+        "combo_type": { "type": "string", "optional": true, "description": "连击类型" }
+      }
+    },
+    "CUSTOM": {
+      "id": "CUSTOM",
+      "name": "自定义条件",
+      "description": "通过代码自定义的条件",
+      "params": {
+        "checker_id": { "type": "string", "description": "自定义检查器ID" },
+        "custom_data": { "type": "object", "optional": true, "description": "自定义数据" }
+      }
+    }
+  },
+  "storage_format": {
+    "description": "成就数据存储格式（与存档系统兼容）",
+    "schema": {
+      "version": { "type": "string", "description": "成就数据版本" },
+      "achievements": {
+        "type": "object",
+        "patternProperties": {
+          "^[a-z_]+$": {
+            "type": "object",
+            "properties": {
+              "is_unlocked": { "type": "boolean" },
+              "unlocked_at": { "type": "string", "format": "date-time" },
+              "current_progress": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["is_unlocked"]
+          }
+        }
+      },
+      "cumulative_stats": {
+        "type": "object",
+        "description": "跨存档累积统计",
+        "patternProperties": {
+          "^[a-z_]+$": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

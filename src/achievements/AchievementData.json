@@ -1,0 +1,184 @@
+{
+  "version": "1.0.0",
+  "description": "迷雾绘者成就数据配置",
+  "achievements": {
+    "first_step": {
+      "id": "first_step",
+      "name": "第一步",
+      "description": "完成第一关，踏上迷雾之旅",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/first_step.png",
+      "type": "ONE_TIME",
+      "rarity": "COMMON",
+      "conditionType": "LEVEL_COMPLETE",
+      "conditionParams": {
+        "level": 1
+      },
+      "targetProgress": 1,
+      "points": 10,
+      "isHidden": false
+    },
+    "map_master": {
+      "id": "map_master",
+      "name": "绘图大师",
+      "description": "绘制100个地图格子",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/map_master.png",
+      "type": "PROGRESS",
+      "rarity": "COMMON",
+      "conditionType": "STAT_REACHED",
+      "conditionParams": {
+        "statName": "maps_drawn",
+        "value": 100
+      },
+      "targetProgress": 100,
+      "points": 20,
+      "isHidden": false
+    },
+    "secret_hunter": {
+      "id": "secret_hunter",
+      "name": "秘密猎人",
+      "description": "发现10个隐藏秘密",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/secret_hunter.png",
+      "type": "PROGRESS",
+      "rarity": "UNCOMMON",
+      "conditionType": "SECRET_FOUND",
+      "conditionParams": {
+        "count": 10
+      },
+      "targetProgress": 10,
+      "points": 30,
+      "isHidden": false
+    },
+    "puzzle_solver": {
+      "id": "puzzle_solver",
+      "name": "解谜专家",
+      "description": "解决20个谜题",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/puzzle_solver.png",
+      "type": "PROGRESS",
+      "rarity": "UNCOMMON",
+      "conditionType": "PUZZLE_SOLVED",
+      "conditionParams": {
+        "count": 20
+      },
+      "targetProgress": 20,
+      "points": 30,
+      "isHidden": false
+    },
+    "mist_walker": {
+      "id": "mist_walker",
+      "name": "迷雾行者",
+      "description": "使用迷雾能力50次",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/mist_walker.png",
+      "type": "PROGRESS",
+      "rarity": "RARE",
+      "conditionType": "MIST_USED",
+      "conditionParams": {
+        "count": 50
+      },
+      "targetProgress": 50,
+      "points": 50,
+      "isHidden": false
+    },
+    "depth_explorer": {
+      "id": "depth_explorer",
+      "name": "深渊探险家",
+      "description": "到达第10层",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/depth_explorer.png",
+      "type": "ONE_TIME",
+      "rarity": "RARE",
+      "conditionType": "STAT_REACHED",
+      "conditionParams": {
+        "statName": "max_layer_reached",
+        "value": 10
+      },
+      "targetProgress": 1,
+      "points": 50,
+      "isHidden": false
+    },
+    "perfectionist": {
+      "id": "perfectionist",
+      "name": "完美主义者",
+      "description": "不死亡通关前5层",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/perfectionist.png",
+      "type": "ONE_TIME",
+      "rarity": "EPIC",
+      "conditionType": "NO_DEATH_RUN",
+      "conditionParams": {
+        "layers": 5
+      },
+      "targetProgress": 1,
+      "points": 100,
+      "isHidden": false
+    },
+    "treasure_collector": {
+      "id": "treasure_collector",
+      "name": "宝藏收藏家",
+      "description": "收集所有类型的道具",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/treasure_collector.png",
+      "type": "PROGRESS",
+      "rarity": "EPIC",
+      "conditionType": "ITEM_COLLECTED",
+      "conditionParams": {
+        "count": 15
+      },
+      "targetProgress": 15,
+      "points": 100,
+      "isHidden": false
+    },
+    "speed_runner": {
+      "id": "speed_runner",
+      "name": "极速通关",
+      "description": "在30分钟内完成游戏",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/speed_runner.png",
+      "type": "ONE_TIME",
+      "rarity": "LEGENDARY",
+      "conditionType": "CUSTOM",
+      "conditionParams": {
+        "checkerId": "speed_run_checker",
+        "customData": {
+          "timeLimit": 1800
+        }
+      },
+      "targetProgress": 1,
+      "points": 200,
+      "isHidden": false
+    },
+    "true_painter": {
+      "id": "true_painter",
+      "name": "真正的绘者",
+      "description": "???",
+      "hiddenDescription": "完成所有其他成就",
+      "iconLockedPath": "assets/achievements/locked.png",
+      "iconUnlockedPath": "assets/achievements/true_painter.png",
+      "type": "HIDDEN",
+      "rarity": "LEGENDARY",
+      "conditionType": "CUSTOM",
+      "conditionParams": {
+        "checkerId": "all_achievements_checker"
+      },
+      "targetProgress": 1,
+      "points": 500,
+      "isHidden": true
+    }
+  },
+  "cumulativeStats": {
+    "total_play_time": 0,
+    "total_deaths": 0,
+    "total_steps": 0,
+    "maps_drawn": 0,
+    "puzzles_solved": 0,
+    "secrets_found": 0,
+    "items_collected": 0,
+    "layers_explored": 0,
+    "mist_uses": 0,
+    "max_layer_reached": 0
+  }
+}

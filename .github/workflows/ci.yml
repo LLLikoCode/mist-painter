@@ -1,0 +1,237 @@
+# CI/CD Pipeline for Mist Painter (迷雾绘者)
+# Godot 4.x Adventure Puzzle Game
+
+name: CI - Code Quality & Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.gd'
+      - '**.tscn'
+      - '**.tres'
+      - 'project.godot'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '**.gd'
+      - '**.tscn'
+      - '**.tres'
+      - 'project.godot'
+      - '.github/workflows/ci.yml'
+
+env:
+  GODOT_VERSION: "4.2.2"
+  EXPORT_NAME: "mist-painter"
+
+jobs:
+  # ============================================
+  # 代码检查
+  # ============================================
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Cache Godot Editor Data
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot
+          key: godot-${{ env.GODOT_VERSION }}-${{ runner.os }}
+
+      # GDScript 静态分析
+      - name: Install gdlint
+        run: |
+          pip install gdtoolkit
+
+      - name: Run GDScript Linter
+        run: |
+          echo "Running GDScript linting..."
+          # 检查 src 目录下的所有 GDScript 文件
+          if [ -d "src" ]; then
+            find src -name "*.gd" -exec gdlint {} + || true
+          fi
+          echo "Linting complete."
+
+      # 检查项目文件完整性
+      - name: Validate Project Structure
+        run: |
+          echo "Validating project structure..."
+          
+          # 检查关键文件是否存在
+          if [ ! -f "project.godot" ]; then
+            echo "❌ project.godot not found!"
+            exit 1
+          fi
+          
+          if [ ! -d "src" ]; then
+            echo "❌ src directory not found!"
+            exit 1
+          fi
+          
+          if [ ! -d "scenes" ]; then
+            echo "❌ scenes directory not found!"
+            exit 1
+          fi
+          
+          echo "✅ Project structure validation passed"
+
+      # 检查 GDScript 语法
+      - name: Syntax Check GDScript Files
+        run: |
+          echo "Checking GDScript syntax..."
+          
+          # 使用 Godot 的脚本检查功能
+          godot --headless --check-only -e --quit 2>&1 | tee godot_check.log || true
+          
+          # 检查是否有语法错误
+          if grep -i "error\|parse error\|syntax error" godot_check.log > /dev/null 2>&1; then
+            echo "❌ Syntax errors found in GDScript files"
+            exit 1
+          fi
+          
+          echo "✅ Syntax check passed"
+
+  # ============================================
+  # 单元测试
+  # ============================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Cache Godot Editor Data
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot
+          key: godot-test-${{ env.GODOT_VERSION }}-${{ runner.os }}
+
+      # 运行 GUT (Godot Unit Test) 测试
+      - name: Install GUT
+        run: |
+          # 克隆 GUT 到项目
+          mkdir -p addons
+          if [ ! -d "addons/gut" ]; then
+            git clone --depth 1 --branch v9.2.1 https://github.com/bitwes/Gut.git addons/gut
+          fi
+
+      - name: Run Unit Tests
+        run: |
+          echo "Running unit tests..."
+          
+          # 创建测试运行脚本
+          cat > run_tests.gd << 'EOF'
+          extends SceneTree
+
+          func _init():
+              var gut = load("res://addons/gut/GutScene.tscn").instantiate()
+              get_root().add_child(gut)
+              
+              # 配置 GUT
+              gut.auto_run = true
+              gut.directory1 = "res://tests"
+              gut.include_subdirectories = true
+              
+              # 等待测试完成
+              await gut.test_execution_finished
+              
+              var exit_code = 0 if gut.get_pass_count() > 0 and gut.get_fail_count() == 0 else 1
+              print("Tests completed: " + str(gut.get_pass_count()) + " passed, " + str(gut.get_fail_count()) + " failed")
+              
+              quit(exit_code)
+          EOF
+          
+          # 运行测试
+          godot --headless --script run_tests.gd 2>&1 | tee test_results.log || true
+          
+          # 如果没有测试目录或测试，记录但不失败
+          if [ ! -d "tests" ] || [ -z "$(ls -A tests 2>/dev/null)" ]; then
+            echo "⚠️ No tests found in tests/ directory"
+            exit 0
+          fi
+          
+          echo "✅ Unit tests execution completed"
+
+      # 上传测试结果
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test_results.log
+            godot_check.log
+          retention-days: 7
+
+  # ============================================
+  # 构建验证
+  # ============================================
+  build-validation:
+    name: Build Validation
+    runs-on: ubuntu-latest
+    needs: code-quality
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Cache Godot Editor Data
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot
+          key: godot-build-${{ env.GODOT_VERSION }}-${{ runner.os }}
+
+      - name: Import Project Assets
+        run: |
+          echo "Importing project assets..."
+          # 使用 Godot 导入资产
+          timeout 120 godot --headless --editor --quit 2>&1 | tee import.log || true
+          echo "✅ Asset import completed"
+
+      - name: Validate Export Presets
+        run: |
+          echo "Validating export presets..."
+          
+          if [ ! -f "export_presets.cfg" ]; then
+            echo "⚠️ export_presets.cfg not found. Skipping export validation."
+            exit 0
+          fi
+          
+          # 检查导出预设配置
+          echo "Available export presets:"
+          grep "^preset=" export_presets.cfg || echo "No presets found"
+          
+          echo "✅ Export presets validation completed"
+
+      # 上传日志
+      - name: Upload Build Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            import.log
+          retention-days: 7

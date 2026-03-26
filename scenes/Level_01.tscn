@@ -1,0 +1,189 @@
+[gd_scene load_steps=8 format=3 uid="uid://level_01_scene_001"]
+
+[ext_resource type="Script" path="res://src/gameplay/PuzzleController.gd" id="1_puzzle_controller"]
+
+[sub_resource type="RectangleShape2D" id="PressurePlateShape"]
+size = Vector2(48, 48)
+
+[sub_resource type="RectangleShape2D" id="SwitchShape"]
+size = Vector2(40, 40)
+
+[sub_resource type="RectangleShape2D" id="DoorShape"]
+size = Vector2(80, 120)
+
+[sub_resource type="CircleShape2D" id="GoalShape"]
+radius = 40.0
+
+[sub_resource type="Gradient" id="PlateGradient"]
+colors = PackedColorArray(0.6, 0.6, 0.6, 1, 0.8, 0.8, 0.8, 1)
+
+[sub_resource type="GradientTexture2D" id="PlateTexture"]
+gradient = SubResource("PlateGradient")
+width = 48
+height = 48
+
+[node name="Level01" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="."]
+format = 2
+
+[node name="Floor" type="TileMapLayer" parent="TileMap"]
+
+[node name="Walls" type="TileMapLayer" parent="TileMap"]
+
+[node name="Decorations" type="TileMapLayer" parent="TileMap"]
+
+[node name="Puzzles" type="Node2D" parent="."]
+
+[node name="PressurePlate1" type="Node2D" parent="Puzzles"]
+position = Vector2(300, 400)
+script = ExtResource("1_puzzle_controller")
+puzzle_id = "level01_plate1"
+puzzle_name = "压力板1"
+puzzle_type = 5
+hint_text = "踩下压力板来激活机关"
+
+[node name="InteractionArea" type="Area2D" parent="Puzzles/PressurePlate1"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Puzzles/PressurePlate1/InteractionArea"]
+shape = SubResource("PressurePlateShape")
+
+[node name="Visual" type="Node2D" parent="Puzzles/PressurePlate1"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Puzzles/PressurePlate1/Visual"]
+texture = SubResource("PlateTexture")
+
+[node name="HintLabel" type="Label" parent="Puzzles/PressurePlate1"]
+visible = false
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = -20.0
+text = "压力板"
+horizontal_alignment = 1
+
+[node name="PressurePlate2" type="Node2D" parent="Puzzles"]
+position = Vector2(500, 300)
+script = ExtResource("1_puzzle_controller")
+puzzle_id = "level01_plate2"
+puzzle_name = "压力板2"
+puzzle_type = 5
+hint_text = "按正确顺序踩下压力板"
+
+[node name="InteractionArea" type="Area2D" parent="Puzzles/PressurePlate2"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Puzzles/PressurePlate2/InteractionArea"]
+shape = SubResource("PressurePlateShape")
+
+[node name="Visual" type="Node2D" parent="Puzzles/PressurePlate2"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Puzzles/PressurePlate2/Visual"]
+texture = SubResource("PlateTexture")
+
+[node name="HintLabel" type="Label" parent="Puzzles/PressurePlate2"]
+visible = false
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = -20.0
+text = "压力板"
+horizontal_alignment = 1
+
+[node name="SwitchPuzzle" type="Node2D" parent="Puzzles"]
+position = Vector2(700, 500)
+script = ExtResource("1_puzzle_controller")
+puzzle_id = "level01_switch"
+puzzle_name = "开关谜题"
+puzzle_type = 0
+hint_text = "找到正确的开关组合来开门"
+
+[node name="InteractionArea" type="Area2D" parent="Puzzles/SwitchPuzzle"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Puzzles/SwitchPuzzle/InteractionArea"]
+shape = SubResource("SwitchShape")
+
+[node name="Visual" type="Node2D" parent="Puzzles/SwitchPuzzle"]
+
+[node name="ColorRect" type="ColorRect" parent="Puzzles/SwitchPuzzle/Visual"]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.9, 0.5, 0.2, 1)
+
+[node name="HintLabel" type="Label" parent="Puzzles/SwitchPuzzle"]
+visible = false
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = -20.0
+text = "开关"
+horizontal_alignment = 1
+
+[node name="ExitDoor" type="Node2D" parent="Puzzles"]
+position = Vector2(1000, 360)
+script = ExtResource("1_puzzle_controller")
+puzzle_id = "level01_exit"
+puzzle_name = "出口门"
+puzzle_type = 6
+hint_text = "解开所有谜题后大门会打开"
+
+[node name="InteractionArea" type="Area2D" parent="Puzzles/ExitDoor"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Puzzles/ExitDoor/InteractionArea"]
+shape = SubResource("DoorShape")
+
+[node name="Visual" type="Node2D" parent="Puzzles/ExitDoor"]
+
+[node name="ColorRect" type="ColorRect" parent="Puzzles/ExitDoor/Visual"]
+offset_left = -40.0
+offset_top = -60.0
+offset_right = 40.0
+offset_bottom = 60.0
+color = Color(0.4, 0.3, 0.2, 1)
+
+[node name="HintLabel" type="Label" parent="Puzzles/ExitDoor"]
+visible = false
+offset_left = -40.0
+offset_top = -80.0
+offset_right = 40.0
+offset_bottom = -60.0
+text = "出口"
+horizontal_alignment = 1
+
+[node name="Goal" type="Area2D" parent="."]
+position = Vector2(1100, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Goal"]
+shape = SubResource("GoalShape")
+
+[node name="Visual" type="ColorRect" parent="Goal"]
+offset_left = -30.0
+offset_top = -30.0
+offset_right = 30.0
+offset_bottom = 30.0
+color = Color(0.2, 0.8, 0.4, 0.5)
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(100, 360)
+
+[node name="CameraBounds" type="ReferenceRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="MistClearZones" type="Node2D" parent="."]
+
+[node name="ClearZone1" type="Marker2D" parent="MistClearZones"]
+position = Vector2(300, 400)
+
+[node name="ClearZone2" type="Marker2D" parent="MistClearZones"]
+position = Vector2(500, 300)
+
+[node name="ClearZone3" type="Marker2D" parent="MistClearZones"]
+position = Vector2(700, 500)
+
+[node name="LevelInfo" type="Node" parent="."]
+script = ExtResource("1_puzzle_controller")
+
+[node name="Metadata" type="Node" parent="LevelInfo"]
+script = ExtResource("1_puzzle_controller")
