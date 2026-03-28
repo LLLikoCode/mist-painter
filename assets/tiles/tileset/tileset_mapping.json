@@ -1,0 +1,373 @@
+{
+  "version": "1.0",
+  "tile_size": 32,
+  "total_tiles": 45,
+  "categories": {
+    "nature": [
+      {
+        "id": 0,
+        "name": "nature_grass_1",
+        "display_name": "Grass Patch 1",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_grass_1.png"
+      },
+      {
+        "id": 1,
+        "name": "nature_grass_2",
+        "display_name": "Grass Patch 2",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_grass_2.png"
+      },
+      {
+        "id": 2,
+        "name": "nature_grass_3",
+        "display_name": "Grass Patch 3",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_grass_3.png"
+      },
+      {
+        "id": 3,
+        "name": "nature_grass_4",
+        "display_name": "Grass Patch 4",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_grass_4.png"
+      },
+      {
+        "id": 4,
+        "name": "nature_flower_red",
+        "display_name": "Red Flower",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_flower_red.png"
+      },
+      {
+        "id": 5,
+        "name": "nature_flower_yellow",
+        "display_name": "Yellow Flower",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_flower_yellow.png"
+      },
+      {
+        "id": 6,
+        "name": "nature_flower_blue",
+        "display_name": "Blue Flower",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_flower_blue.png"
+      },
+      {
+        "id": 7,
+        "name": "nature_stone_small",
+        "display_name": "Small Stone",
+        "category": "nature",
+        "collision": true,
+        "file": "decorations/nature/nature_stone_small.png"
+      },
+      {
+        "id": 8,
+        "name": "nature_stone_medium",
+        "display_name": "Medium Stone",
+        "category": "nature",
+        "collision": true,
+        "file": "decorations/nature/nature_stone_medium.png"
+      },
+      {
+        "id": 9,
+        "name": "nature_stone_large",
+        "display_name": "Large Stone",
+        "category": "nature",
+        "collision": true,
+        "file": "decorations/nature/nature_stone_large.png"
+      },
+      {
+        "id": 10,
+        "name": "nature_tree_small",
+        "display_name": "Small Tree",
+        "category": "nature",
+        "collision": true,
+        "file": "decorations/nature/nature_tree_small.png"
+      },
+      {
+        "id": 11,
+        "name": "nature_tree_bush",
+        "display_name": "Bush",
+        "category": "nature",
+        "collision": false,
+        "file": "decorations/nature/nature_tree_bush.png"
+      },
+      {
+        "id": 12,
+        "name": "nature_tree_dead",
+        "display_name": "Dead Tree",
+        "category": "nature",
+        "collision": true,
+        "file": "decorations/nature/nature_tree_dead.png"
+      }
+    ],
+    "manmade": [
+      {
+        "id": 13,
+        "name": "manmade_lamp_classical",
+        "display_name": "Classical Lamp",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_lamp_classical.png"
+      },
+      {
+        "id": 14,
+        "name": "manmade_lamp_modern",
+        "display_name": "Modern Lamp",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_lamp_modern.png"
+      },
+      {
+        "id": 15,
+        "name": "manmade_bench_horizontal",
+        "display_name": "Horizontal Bench",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_bench_horizontal.png"
+      },
+      {
+        "id": 16,
+        "name": "manmade_bench_vertical",
+        "display_name": "Vertical Bench",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_bench_vertical.png"
+      },
+      {
+        "id": 17,
+        "name": "manmade_sign_arrow",
+        "display_name": "Arrow Sign",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_sign_arrow.png"
+      },
+      {
+        "id": 18,
+        "name": "manmade_sign_blank",
+        "display_name": "Blank Sign",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_sign_blank.png"
+      },
+      {
+        "id": 19,
+        "name": "manmade_sign_warning",
+        "display_name": "Warning Sign",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_sign_warning.png"
+      },
+      {
+        "id": 20,
+        "name": "manmade_fence_wood",
+        "display_name": "Wood Fence",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_fence_wood.png"
+      },
+      {
+        "id": 21,
+        "name": "manmade_fence_iron",
+        "display_name": "Iron Fence",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_fence_iron.png"
+      },
+      {
+        "id": 22,
+        "name": "manmade_well",
+        "display_name": "Water Well",
+        "category": "manmade",
+        "collision": true,
+        "file": "decorations/manmade/manmade_well.png"
+      },
+      {
+        "id": 23,
+        "name": "manmade_bucket",
+        "display_name": "Bucket",
+        "category": "manmade",
+        "collision": false,
+        "file": "decorations/manmade/manmade_bucket.png"
+      }
+    ],
+    "special": [
+      {
+        "id": 24,
+        "name": "special_crystal_blue",
+        "display_name": "Blue Crystal",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_crystal_blue.png"
+      },
+      {
+        "id": 25,
+        "name": "special_crystal_pink",
+        "display_name": "Pink Crystal",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_crystal_pink.png"
+      },
+      {
+        "id": 26,
+        "name": "special_rune_north",
+        "display_name": "North Rune",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_rune_north.png"
+      },
+      {
+        "id": 27,
+        "name": "special_rune_south",
+        "display_name": "South Rune",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_rune_south.png"
+      },
+      {
+        "id": 28,
+        "name": "special_switch_on",
+        "display_name": "Switch On",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_switch_on.png"
+      },
+      {
+        "id": 29,
+        "name": "special_switch_off",
+        "display_name": "Switch Off",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_switch_off.png"
+      },
+      {
+        "id": 30,
+        "name": "special_mist_source",
+        "display_name": "Mist Source",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_mist_source.png"
+      },
+      {
+        "id": 31,
+        "name": "special_glow_plant",
+        "display_name": "Glowing Plant",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_glow_plant.png"
+      },
+      {
+        "id": 32,
+        "name": "special_hidden_door",
+        "display_name": "Hidden Door",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_hidden_door.png"
+      },
+      {
+        "id": 33,
+        "name": "special_mechanism_gear",
+        "display_name": "Gear Mechanism",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_mechanism_gear.png"
+      },
+      {
+        "id": 34,
+        "name": "special_magic_fragment",
+        "display_name": "Magic Fragment",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_magic_fragment.png"
+      },
+      {
+        "id": 35,
+        "name": "special_plate_on",
+        "display_name": "Pressure Plate On",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_plate_on.png"
+      },
+      {
+        "id": 36,
+        "name": "special_plate_off",
+        "display_name": "Pressure Plate Off",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_plate_off.png"
+      },
+      {
+        "id": 37,
+        "name": "special_door_iron_closed",
+        "display_name": "Iron Door Closed",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_door_iron_closed.png"
+      },
+      {
+        "id": 38,
+        "name": "special_door_iron_open",
+        "display_name": "Iron Door Open",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_door_iron_open.png"
+      },
+      {
+        "id": 39,
+        "name": "special_door_wood_closed",
+        "display_name": "Wood Door Closed",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_door_wood_closed.png"
+      },
+      {
+        "id": 40,
+        "name": "special_door_wood_open",
+        "display_name": "Wood Door Open",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_door_wood_open.png"
+      },
+      {
+        "id": 41,
+        "name": "special_button_on",
+        "display_name": "Button On",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_button_on.png"
+      },
+      {
+        "id": 42,
+        "name": "special_button_off",
+        "display_name": "Button Off",
+        "category": "special",
+        "collision": false,
+        "file": "decorations/special/special_button_off.png"
+      },
+      {
+        "id": 43,
+        "name": "special_lever_on",
+        "display_name": "Lever On",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_lever_on.png"
+      },
+      {
+        "id": 44,
+        "name": "special_lever_off",
+        "display_name": "Lever Off",
+        "category": "special",
+        "collision": true,
+        "file": "decorations/special/special_lever_off.png"
+      }
+    ]
+  }
+}
