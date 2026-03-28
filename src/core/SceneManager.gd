@@ -274,4 +274,5 @@ func _slide_in(direction: Vector2) -> void:
 ## 私有：管理场景栈
 func _push_scene_to_stack(scene_path: String) -> void:
     scene_stack.append(scene_path)
-    if scene_stack.size() > max
+    if scene_stack.size() > max_stack_size:
+        scene_stack.pop_front()

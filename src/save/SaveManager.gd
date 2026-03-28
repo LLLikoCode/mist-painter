@@ -9,6 +9,9 @@ const SAVE_DIR = "user://saves/"
 const SAVE_EXTENSION = ".sav"
 const MAX_SAVE_SLOTS = 3
 
+# 单例实例
+static var instance: SaveManager = null
+
 # 当前存档数据
 var current_save_data: Dictionary = {}
 var current_slot: int = -1
@@ -20,9 +23,20 @@ signal save_deleted(slot: int)
 signal save_data_changed()
 
 func _ready():
+    # 设置单例
+    if instance == null:
+        instance = self
+    else:
+        queue_free()
+        return
+
     # 确保存档目录存在
     _ensure_save_dir()
     print("SaveManager initialized")
+
+func _exit_tree():
+    if instance == self:
+        instance = null
 
 ## 确保存档目录存在
 func _ensure_save_dir() -> void:

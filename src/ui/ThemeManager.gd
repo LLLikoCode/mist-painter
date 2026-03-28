@@ -214,4 +214,98 @@ func _create_button_stylebox(bg_color_name: String, border_color_name: String) -
     stylebox.corner_radius_top_left = get_size("border_radius_medium")
     stylebox.corner_radius_top_right = get_size("border_radius_medium")
     stylebox.corner_radius_bottom_left = get_size("border_radius_medium")
-    stylebox.corner_radius_bottom_right = get_size("border_radius_medium
+    stylebox.corner_radius_bottom_right = get_size("border_radius_medium")
+
+    return stylebox
+
+## 创建面板样式框
+func _create_panel_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("surface")
+    stylebox.border_color = get_color("border")
+    stylebox.border_width_left = 1
+    stylebox.border_width_right = 1
+    stylebox.border_width_top = 1
+    stylebox.border_width_bottom = 1
+    stylebox.corner_radius_top_left = get_size("border_radius_medium")
+    stylebox.corner_radius_top_right = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_left = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_right = get_size("border_radius_medium")
+
+    return stylebox
+
+## 创建进度条背景样式框
+func _create_progress_bg_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("surface_variant")
+    stylebox.corner_radius_top_left = get_size("border_radius_medium")
+    stylebox.corner_radius_top_right = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_left = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_right = get_size("border_radius_medium")
+
+    return stylebox
+
+## 创建进度条填充样式框
+func _create_progress_fill_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("primary")
+    stylebox.corner_radius_top_left = get_size("border_radius_medium")
+    stylebox.corner_radius_top_right = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_left = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_right = get_size("border_radius_medium")
+
+    return stylebox
+
+## 创建滑块抓取器样式框
+func _create_slider_grabber_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("primary")
+    stylebox.corner_radius_top_left = 8
+    stylebox.corner_radius_top_right = 8
+    stylebox.corner_radius_bottom_left = 8
+    stylebox.corner_radius_bottom_right = 8
+
+    return stylebox
+
+## 创建滑块背景样式框
+func _create_slider_bg_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("surface_variant")
+    stylebox.corner_radius_top_left = 4
+    stylebox.corner_radius_top_right = 4
+    stylebox.corner_radius_bottom_left = 4
+    stylebox.corner_radius_bottom_right = 4
+
+    return stylebox
+
+## 创建 LineEdit 样式框
+func _create_line_edit_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("surface")
+    stylebox.border_color = get_color("border")
+    stylebox.border_width_left = 1
+    stylebox.border_width_right = 1
+    stylebox.border_width_top = 1
+    stylebox.border_width_bottom = 1
+    stylebox.corner_radius_top_left = get_size("border_radius_medium")
+    stylebox.corner_radius_top_right = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_left = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_right = get_size("border_radius_medium")
+
+    return stylebox
+
+## 创建 LineEdit 聚焦样式框
+func _create_line_edit_focused_stylebox() -> StyleBoxFlat:
+    var stylebox = StyleBoxFlat.new()
+    stylebox.bg_color = get_color("surface")
+    stylebox.border_color = get_color("border_focused")
+    stylebox.border_width_left = 2
+    stylebox.border_width_right = 2
+    stylebox.border_width_top = 2
+    stylebox.border_width_bottom = 2
+    stylebox.corner_radius_top_left = get_size("border_radius_medium")
+    stylebox.corner_radius_top_right = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_left = get_size("border_radius_medium")
+    stylebox.corner_radius_bottom_right = get_size("border_radius_medium")
+
+    return stylebox

@@ -277,10 +277,10 @@ func _verify_all_systems() -> bool:
 ## 设置全局引用
 func _setup_global_references() -> void:
     # 将系统引用添加到AutoLoad以便全局访问
-    AutoLoad.set_meta("save_manager", save_manager)
-    AutoLoad.set_meta("achievement_manager", achievement_manager)
-    AutoLoad.set_meta("audio_manager", audio_manager)
-    AutoLoad.set_meta("game_initializer", self)
+    AutoLoad.register_save_manager(save_manager)
+    AutoLoad.register_achievement_manager(achievement_manager)
+    AutoLoad.register_audio_manager(audio_manager)
+    AutoLoad.register_game_initializer(self)
 
 # ============================================
 # 事件订阅

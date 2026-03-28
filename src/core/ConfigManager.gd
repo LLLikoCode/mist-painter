@@ -8,6 +8,9 @@ extends Node
 const CONFIG_FILE_PATH = "user://config.cfg"
 const DEFAULT_SECTION = "settings"
 
+# 单例实例
+static var instance: ConfigManager = null
+
 # 默认配置值
 const DEFAULT_CONFIG = {
     # 显示设置
@@ -51,12 +54,23 @@ signal setting_changed(key: String, value: Variant)
 signal settings_reset()
 
 func _ready():
+    # 设置单例
+    if instance == null:
+        instance = self
+    else:
+        queue_free()
+        return
+
     process_mode = Node.PROCESS_MODE_ALWAYS
-    
+
     # 加载配置
     load_config()
-    
+
     print("ConfigManager initialized")
+
+func _exit_tree():
+    if instance == self:
+        instance = null
 
 ## 加载配置
 func load_config() -> bool:
