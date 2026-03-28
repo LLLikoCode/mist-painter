@@ -101,8 +101,8 @@ func _setup_layout() -> void:
     
     _icon_texture = TextureRect.new()
     _icon_texture.name = "IconTexture"
-    _icon_texture.expand_mode = TextureRect.EXPAND_FIT_SIZE_PROPORTIONAL
     _icon_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    _icon_texture.expand_mode = 3
     _icon_texture.custom_minimum_size = Vector2(56, 56)
     icon_container.add_child(_icon_texture)
     

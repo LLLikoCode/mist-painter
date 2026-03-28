@@ -63,7 +63,7 @@ func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	print("EventBus initialized")
 
-func _process(delta):
+func _process(_delta):
 	# 处理事件队列
 	if not _event_queue.is_empty() and not _processing_queue:
 		_process_event_queue()

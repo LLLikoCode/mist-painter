@@ -239,3 +239,168 @@ func refresh() -> void:
         return
     _refresh_achievements()
     _update_stats()
+
+# ============================================
+# 私有方法
+# ============================================
+
+## 刷新成就列表
+func _refresh_achievements() -> void:
+    # 清空现有项
+    for item in _achievement_items:
+        if is_instance_valid(item):
+            item.queue_free()
+    _achievement_items.clear()
+
+    if AchievementManager.instance == null:
+        return
+
+    # 获取所有成就
+    var all_achievements = AchievementManager.instance.get_all_achievements()
+
+    for achievement in all_achievements:
+        var achievement_data = achievement as AchievementData.Achievement
+        if achievement_data == null:
+            continue
+
+        # 根据筛选条件过滤
+        if not _should_show_achievement(achievement_data):
+            continue
+
+        # 创建成就项
+        var achievement_item = _create_achievement_item(achievement_data)
+        _achievement_items.append(achievement_item)
+        _achievement_grid.add_child(achievement_item)
+
+## 检查成就是否应该显示
+func _should_show_achievement(achievement: AchievementData.Achievement) -> bool:
+    match _current_filter:
+        "all":
+            return true
+        "unlocked":
+            return achievement.unlocked
+        "locked":
+            return not achievement.unlocked
+        "in_progress":
+            return not achievement.unlocked and achievement.progress > 0
+        "hidden":
+            return achievement.hidden
+    return true
+
+## 创建成就项
+func _create_achievement_item(achievement: AchievementData.Achievement) -> Control:
+    # 如果有自定义场景，使用它
+    if achievement_item_scene:
+        var item = achievement_item_scene.instantiate()
+        if item.has_method("set_achievement"):
+            item.set_achievement(achievement)
+        return item
+
+    # 否则创建一个简单的项
+    var panel = PanelContainer.new()
+    panel.custom_minimum_size = Vector2(300, 100)
+
+    var vbox = VBoxContainer.new()
+    vbox.anchors_preset = Control.PRESET_FULL_RECT
+    panel.add_child(vbox)
+
+    var title_label = Label.new()
+    title_label.text = achievement.name
+    title_label.add_theme_font_size_override("font_size", 16)
+    vbox.add_child(title_label)
+
+    var desc_label = Label.new()
+    desc_label.text = achievement.description
+    desc_label.add_theme_font_size_override("font_size", 12)
+    vbox.add_child(desc_label)
+
+    var progress_label = Label.new()
+    progress_label.text = "%d / %d" % [achievement.progress, achievement.max_progress]
+    progress_label.add_theme_font_size_override("font_size", 12)
+    vbox.add_child(progress_label)
+
+    if achievement.unlocked:
+        var unlocked_label = Label.new()
+        unlocked_label.text = "已解锁！"
+        unlocked_label.add_theme_color_override("font_color", Color(0.2, 0.8, 0.2))
+        vbox.add_child(unlocked_label)
+
+    return panel
+
+## 更新统计数据
+func _update_stats() -> void:
+    if AchievementManager.instance == null:
+        return
+
+    var stats = AchievementManager.instance.get_stats()
+
+    if _unlocked_count_label:
+        _unlocked_count_label.text = "%d/%d" % [stats.unlocked_count, stats.total_count]
+
+    if _total_progress_label:
+        var percentage = 0.0
+        if stats.total_count > 0:
+            percentage = (float(stats.unlocked_count) / float(stats.total_count)) * 100.0
+        _total_progress_label.text = "%.1f%%" % percentage
+
+    if _total_points_label:
+        _total_points_label.text = "%d 点" % stats.total_points
+
+## 打开动画
+func _play_open_animation() -> void:
+    var tween = create_tween()
+    tween.set_ease(Tween.EASE_OUT)
+    tween.set_trans(Tween.TRANS_BACK)
+
+    modulate.a = 0.0
+    scale = Vector2(0.9, 0.9)
+    visible = true
+
+    tween.tween_property(self, "modulate:a", 1.0, open_animation_duration)
+    tween.tween_property(self, "scale", Vector2.ONE, open_animation_duration)
+
+    await tween.finished
+
+## 关闭动画
+func _play_close_animation() -> void:
+    var tween = create_tween()
+    tween.set_ease(Tween.EASE_IN)
+    tween.set_trans(Tween.TRANS_BACK)
+
+    tween.tween_property(self, "modulate:a", 0.0, open_animation_duration)
+    tween.tween_property(self, "scale", Vector2(0.9, 0.9), open_animation_duration)
+
+    await tween.finished
+
+# ============================================
+# 信号处理
+# ============================================
+
+func _on_back_pressed() -> void:
+    await close()
+
+func _on_filter_changed(index: int) -> void:
+    match index:
+        0: _current_filter = "all"
+        1: _current_filter = "unlocked"
+        2: _current_filter = "locked"
+        3: _current_filter = "in_progress"
+        4: _current_filter = "hidden"
+    _refresh_achievements()
+
+func _on_search_changed(new_text: String) -> void:
+    _search_text = new_text
+    _refresh_achievements()
+
+func _on_achievement_unlocked(achievement: AchievementData.Achievement) -> void:
+    if visible:
+        _refresh_achievements()
+        _update_stats()
+
+func _on_achievement_progress_updated(achievement: AchievementData.Achievement) -> void:
+    if visible and _should_show_achievement(achievement):
+        _refresh_achievements()
+
+func _on_stats_updated() -> void:
+    if visible:
+        _update_stats()

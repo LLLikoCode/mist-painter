@@ -57,7 +57,7 @@ func _build_ui() -> void:
         icon_texture.name = "Icon"
         icon_texture.texture = icon
         icon_texture.custom_minimum_size = Vector2(24, 24)
-        icon_texture.expand_mode = TextureRect.EXPAND_FIT_SIZE_PROPORTIONAL
+        icon_texture.expand_mode = 3
         container.add_child(icon_texture)
 
     # 消息标签

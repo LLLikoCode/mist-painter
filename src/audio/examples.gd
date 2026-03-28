@@ -156,7 +156,7 @@ func example_reset_volume():
 func example_ambient():
     # 播放洞穴环境音
     AudioManager.instance.play_ambient(
-        preload("res://assets/audio/ambient/cave.ogg"),
+        load("res://assets/audio/ambient/cave.ogg"),
         true,   # 淡入
         true    # 循环
     )
@@ -310,7 +310,7 @@ class Player extends CharacterBody2D:
 ## 保存时记录音频设置
 func example_save_with_audio():
     var save_data = {
-        "player": { ... },
+        "player": {},
         "settings": {
             # 从AudioManager获取当前设置
             "masterVolume": AudioManager.instance.master_volume,

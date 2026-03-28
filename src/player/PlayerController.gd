@@ -78,7 +78,6 @@ var current_interactable: Node = null
 signal moved(position: Vector2, velocity: Vector2)
 signal direction_changed(new_direction: String)
 signal interaction_started(target: Node)
-signal interaction_ended(target: Node)
 signal paint_started(position: Vector2)
 signal paint_ended(position: Vector2)
 signal paint_moved(position: Vector2)
@@ -88,81 +87,81 @@ signal paint_moved(position: Vector2)
 # ============================================
 
 func _ready():
-    # 确保碰撞层设置正确
-    collision_layer = 1  # Player层
-    collision_mask = 6   # Environment (2) + Interactables (3)
-    
-    # 设置交互区域
-    if interaction_area:
-        interaction_area.collision_layer = 0
-        interaction_area.collision_mask = 4  # Interactables层
-        interaction_area.body_entered.connect(_on_interaction_area_entered)
-        interaction_area.body_exited.connect(_on_interaction_area_exited)
-    
-    # 初始化动画
-    _update_animation("idle")
-    
-    print("PlayerController initialized")
+	# 确保碰撞层设置正确
+	collision_layer = 1  # Player层
+	collision_mask = 6   # Environment (2) + Interactables (3)
+	
+	# 设置交互区域
+	if interaction_area:
+		interaction_area.collision_layer = 0
+		interaction_area.collision_mask = 4  # Interactables层
+		interaction_area.body_entered.connect(_on_interaction_area_entered)
+		interaction_area.body_exited.connect(_on_interaction_area_exited)
+	
+	# 初始化动画
+	_update_animation("idle")
+	
+	print("PlayerController initialized")
 
 func _physics_process(delta: float):
-    # 更新计时器
-    _update_timers(delta)
-    
-    # 处理输入
-    _handle_input(delta)
-    
-    # 应用移动
-    _apply_movement(delta)
-    
-    # 更新动画
-    _update_animation_based_on_velocity()
+	# 更新计时器
+	_update_timers(delta)
+	
+	# 处理输入
+	_handle_input(delta)
+	
+	# 应用移动
+	_apply_movement(delta)
+	
+	# 更新动画
+	_update_animation_based_on_velocity()
 
-func _process(delta: float):
-    # 处理迷雾绘制输入
-    _handle_paint_input()
+func _process(_delta: float):
+	# 处理迷雾绘制输入
+	_handle_paint_input()
 
 func _input(event: InputEvent):
-    # 处理交互输入
-    if event.is_action_pressed("interact") and interaction_timer <= 0:
-        _try_interact()
+	# 处理交互输入
+	if event.is_action_pressed("interact") and interaction_timer <= 0:
+		_try_interact()
 
 # ============================================
 # 输入处理
 # ============================================
 
 ## 处理移动输入
-func _handle_input(delta: float) -> void:
-    # 获取输入方向
-    var input_direction = Vector2.ZERO
-    input_direction.x = Input.get_axis("move_left", "move_right")
-    input_direction.y = Input.get_axis("move_up", "move_down")
-    
-    # 归一化对角线移动
-    if input_direction.length() > 1.0:
-        input_direction = input_direction.normalized()
-    
-    current_direction = input_direction
-    
-    # 检测冲刺
-    is_sprinting = Input.is_action_pressed("sprint")
+func _handle_input(_delta: float) -> void:
+	# 获取输入方向
+	var input_direction = Vector2.ZERO
+	input_direction.x = Input.get_axis("move_left", "move_right")
+	input_direction.y = Input.get_axis("move_up", "move_down")
+	
+	# 归一化对角线移动
+	if input_direction.length() > 1.0:
+		input_direction = input_direction.normalized()
+	
+	current_direction = input_direction
+	
+	# 检测冲刺
+	is_sprinting = Input.is_action_pressed("sprint")
 
 ## 处理迷雾绘制输入
 func _handle_paint_input() -> void:
-    if not can_paint_mist:
-        return
-    
-    var is_paint_pressed = Input.is_action_pressed("paint_mist")
-    
-    if is_paint_pressed and paint_timer <= 0:
-        if not is_painting:
-            is_painting = true
-            paint_started.emit(global_position)
-        else:
-            paint_moved.emit(global_position)
-        paint_timer = paint_cooldown
-    elif not is_paint_pressed and is_painting:
-        is_painting = false
-        paint_ended.emit(global_position)
+	if not can_paint_mist:
+		return
+	
+	var is_paint_pressed = Input.is_action_pressed("paint_mist")
+	
+	if is_paint_pressed and paint_timer <= 0:
+		if not is_painting:
+			is_painting = true
+			paint_started.emit(global_position)
+		else:
+			paint_moved.emit(global_position)
+		paint_timer = paint_cooldown
+	elif not is_paint_pressed and is_painting:
+		is_painting = false
+		paint_ended.emit(global_position)
 
 # ============================================
 # 移动处理
@@ -170,59 +169,62 @@ func _handle_paint_input() -> void:
 
 ## 应用移动
 func _apply_movement(delta: float) -> void:
-    var target_speed = sprint_speed if is_sprinting else move_speed
-    
-    if current_direction != Vector2.ZERO:
-        # 加速
-        velocity = velocity.move_toward(current_direction * target_speed, acceleration * delta)
-    else:
-        # 减速
-        velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
-    
-    # 移动并滑动
-    move_and_slide()
-    
-    # 发送移动信号
-    if velocity.length() > ANIM_IDLE_THRESHOLD:
-        moved.emit(global_position, velocity)
+	var target_speed = sprint_speed if is_sprinting else move_speed
+	
+	if current_direction != Vector2.ZERO:
+		# 加速
+		velocity = velocity.move_toward(current_direction * target_speed, acceleration * delta)
+	else:
+		# 减速
+		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
+	
+	# 移动并滑动
+	move_and_slide()
+	
+	# 发送移动信号
+	if velocity.length() > ANIM_IDLE_THRESHOLD:
+		moved.emit(global_position, velocity)
 
 ## 根据速度更新动画
 func _update_animation_based_on_velocity() -> void:
-    # 确定朝向
-    if velocity.length() > ANIM_IDLE_THRESHOLD:
-        var new_facing = _get_facing_from_velocity(velocity)
-        if new_facing != facing_direction:
-            facing_direction = new_facing
-            direction_changed.emit(facing_direction)
-        
-        _update_animation("walk")
-    else:
-        _update_animation("idle")
+	# 确定朝向
+	if velocity.length() > ANIM_IDLE_THRESHOLD:
+		var new_facing = _get_facing_from_velocity(velocity)
+		if new_facing != facing_direction:
+			facing_direction = new_facing
+			direction_changed.emit(facing_direction)
+		
+		_update_animation("walk")
+	else:
+		_update_animation("idle")
 
 ## 根据速度获取朝向
 func _get_facing_from_velocity(vel: Vector2) -> String:
-    if abs(vel.x) > abs(vel.y):
-        return "right" if vel.x > 0 else "left"
-    else:
-        return "down" if vel.y > 0 else "up"
+	if abs(vel.x) > abs(vel.y):
+		return "right" if vel.x > 0 else "left"
+	else:
+		return "down" if vel.y > 0 else "up"
 
 ## 更新动画
 func _update_animation(anim_state: String) -> void:
-    if sprite == null:
-        return
-    
-    var anim_name = anim_state + "_" + facing_direction
-    
-    # 检查动画是否存在
-    if sprite.sprite_frames.has_animation(anim_name):
-        if sprite.animation != anim_name:
-            sprite.play(anim_name)
-    else:
-        # 回退到默认动画
-        var fallback = anim_state + "_down"
-        if sprite.sprite_frames.has_animation(fallback):
-            if sprite.animation != fallback:
-                sprite.play(fallback)
+	if sprite == null:
+		return
+	
+	if sprite.sprite_frames == null:
+		return
+
+	var anim_name = anim_state + "_" + facing_direction
+	
+	# 检查动画是否存在
+	if sprite.sprite_frames.has_animation(anim_name):
+		if sprite.animation != anim_name:
+			sprite.play(anim_name)
+	else:
+		# 回退到默认动画
+		var fallback = anim_state + "_down"
+		if sprite.sprite_frames.has_animation(fallback):
+			if sprite.animation != fallback:
+				sprite.play(fallback)
 
 # ============================================
 # 交互处理
@@ -230,49 +232,49 @@ func _update_animation(anim_state: String) -> void:
 
 ## 尝试交互
 func _try_interact() -> void:
-    if current_interactable == null:
-        return
-    
-    interaction_timer = interaction_cooldown
-    
-    # 调用交互对象的方法
-    if current_interactable.has_method("interact"):
-        current_interactable.interact(self)
-        interaction_started.emit(current_interactable)
-        
-        # 播放交互动画
-        _play_interact_animation()
+	if current_interactable == null:
+		return
+	
+	interaction_timer = interaction_cooldown
+	
+	# 调用交互对象的方法
+	if current_interactable.has_method("interact"):
+		current_interactable.interact(self)
+		interaction_started.emit(current_interactable)
+		
+		# 播放交互动画
+		_play_interact_animation()
 
 ## 播放交互动画
 func _play_interact_animation() -> void:
-    # 可以添加短暂的交互动画
-    pass
+	# 可以添加短暂的交互动画
+	pass
 
 ## 交互区域进入
 func _on_interaction_area_entered(body: Node) -> void:
-    if body.has_method("can_interact") and body.can_interact():
-        current_interactable = body
-        # 可以在这里显示交互提示UI
-        if body.has_method("show_interaction_hint"):
-            body.show_interaction_hint()
+	if body.has_method("can_interact") and body.can_interact():
+		current_interactable = body
+		# 可以在这里显示交互提示UI
+		if body.has_method("show_interaction_hint"):
+			body.show_interaction_hint()
 
 ## 交互区域退出
 func _on_interaction_area_exited(body: Node) -> void:
-    if body == current_interactable:
-        if body.has_method("hide_interaction_hint"):
-            body.hide_interaction_hint()
-        current_interactable = null
+	if body == current_interactable:
+		if body.has_method("hide_interaction_hint"):
+			body.hide_interaction_hint()
+		current_interactable = null
 
 # ============================================
 # 计时器更新
 # ============================================
 
 func _update_timers(delta: float) -> void:
-    if interaction_timer > 0:
-        interaction_timer -= delta
-    
-    if paint_timer > 0:
-        paint_timer -= delta
+	if interaction_timer > 0:
+		interaction_timer -= delta
+	
+	if paint_timer > 0:
+		paint_timer -= delta
 
 # ============================================
 # 公共方法
@@ -280,49 +282,49 @@ func _update_timers(delta: float) -> void:
 
 ## 设置位置（带安全检测）
 func set_player_position(pos: Vector2) -> void:
-    global_position = pos
-    velocity = Vector2.ZERO
+	global_position = pos
+	velocity = Vector2.ZERO
 
 ## 获取当前朝向
 func get_facing_direction() -> String:
-    return facing_direction
+	return facing_direction
 
 ## 获取朝向向量
 func get_facing_vector() -> Vector2:
-    match facing_direction:
-        "up": return Vector2.UP
-        "down": return Vector2.DOWN
-        "left": return Vector2.LEFT
-        "right": return Vector2.RIGHT
-    return Vector2.DOWN
+	match facing_direction:
+		"up": return Vector2.UP
+		"down": return Vector2.DOWN
+		"left": return Vector2.LEFT
+		"right": return Vector2.RIGHT
+	return Vector2.DOWN
 
 ## 禁用移动
 func disable_movement() -> void:
-    set_physics_process(false)
+	set_physics_process(false)
 
 ## 启用移动
 func enable_movement() -> void:
-    set_physics_process(true)
+	set_physics_process(true)
 
 ## 禁用迷雾绘制
 func disable_painting() -> void:
-    can_paint_mist = false
-    if is_painting:
-        is_painting = false
-        paint_ended.emit(global_position)
+	can_paint_mist = false
+	if is_painting:
+		is_painting = false
+		paint_ended.emit(global_position)
 
 ## 启用迷雾绘制
 func enable_painting() -> void:
-    can_paint_mist = true
+	can_paint_mist = true
 
 ## 是否正在移动
 func is_moving() -> bool:
-    return velocity.length() > ANIM_IDLE_THRESHOLD
+	return velocity.length() > ANIM_IDLE_THRESHOLD
 
 ## 是否正在绘制
 func is_painting_mist() -> bool:
-    return is_painting
+	return is_painting
 
 ## 获取当前速度
 func get_current_speed() -> float:
-    return velocity.length()
+	return velocity.length()

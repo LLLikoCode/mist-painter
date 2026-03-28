@@ -260,7 +260,7 @@ func continue_drawing(position: Vector2) -> void:
 	last_paint_position = position
 
 ## 结束绘制
-func end_drawing() -> void:
+func end_drawing(_position: Vector2 = Vector2.ZERO) -> void:
 	is_drawing = false
 	drawing_ended.emit()
 
@@ -357,9 +357,9 @@ func _process_paint_queue_legacy() -> void:
 	paint_queue.clear()
 	
 	if modified:
-		# 更新纹理
-		mist_texture.update(mist_image)
-		
+		# 更新纹理 - Godot 4.x 使用 create_from_image 或 set_image
+		mist_texture = ImageTexture.create_from_image(mist_image)
+
 		# 更新覆盖率统计
 		cleared_pixels += cleared_count
 		_update_coverage()
@@ -500,19 +500,11 @@ func _merge_dirty_rects(new_rects: Array[Rect2i]) -> void:
 func _update_texture_partial() -> void:
 	if dirty_rects.is_empty():
 		return
-	
-	# 合并所有脏矩形进行一次性更新
-	var combined_rect = dirty_rects[0]
-	for i in range(1, dirty_rects.size()):
-		combined_rect = combined_rect.merge(dirty_rects[i])
-	
-	# 确保在有效范围内
-	combined_rect = combined_rect.intersection(Rect2i(0, 0, MIST_TEXTURE_SIZE.x, MIST_TEXTURE_SIZE.y))
-	
-	if combined_rect.size.x > 0 and combined_rect.size.y > 0:
-		# 使用局部更新
-		mist_texture.update(mist_image, combined_rect)
-	
+
+	# Godot 4.x 中 ImageTexture.update() 不接受矩形参数
+	# 重新创建纹理以应用更改
+	mist_texture = ImageTexture.create_from_image(mist_image)
+
 	# 清空脏矩形列表
 	dirty_rects.clear()
 
@@ -580,7 +572,7 @@ func _regenerate_mist_legacy(delta: float) -> void:
 				modified = true
 	
 	if modified:
-		mist_texture.update(mist_image)
+		mist_texture = ImageTexture.create_from_image(mist_image)
 		_update_coverage()
 
 # ============================================
@@ -688,14 +680,14 @@ func fill_mist_circle(center: Vector2, radius: float) -> void:
 			if pos.distance_to(image_center) <= radius:
 				mist_image.set_pixel(x, y, MIST_COLOR)
 	
-	mist_texture.update(mist_image)
+	mist_texture = ImageTexture.create_from_image(mist_image)
 	_update_coverage()
 	mist_painted.emit(center, radius)
 
 ## 完全清除所有迷雾
 func clear_all_mist() -> void:
 	mist_image.fill(CLEAR_COLOR)
-	mist_texture.update(mist_image)
+	mist_texture = ImageTexture.create_from_image(mist_image)
 	mist_coverage = 0.0
 	cleared_pixels = total_pixels
 	mist_coverage_changed.emit(0.0)
@@ -703,7 +695,7 @@ func clear_all_mist() -> void:
 ## 完全填充所有迷雾
 func fill_all_mist() -> void:
 	mist_image.fill(MIST_COLOR)
-	mist_texture.update(mist_image)
+	mist_texture = ImageTexture.create_from_image(mist_image)
 	mist_coverage = 1.0
 	cleared_pixels = 0
 	mist_coverage_changed.emit(100.0)

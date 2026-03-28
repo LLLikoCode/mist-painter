@@ -1,9 +1,0 @@
-res://src/core/SceneManager.gd
-res://src/save/SaveManager.gd
-res://src/core/AutoLoad.gd
-res://src/core/GameInitializer.gd
-res://src/ui/ThemeManager.gd
-res://src/ui/components/ToastNotification.gd
-res://src/audio/AudioManager.gd
-res://src/core/EventBus.gd
-res://src/core/ConfigManager.gd

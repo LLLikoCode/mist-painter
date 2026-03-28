@@ -56,6 +56,7 @@ enum VerticalAlign {
 var _full_text: String = ""
 var _typewriter_tween: Tween
 var _is_typing: bool = false
+var max_lines: int = -1
 
 # ============================================
 # 生命周期

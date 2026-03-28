@@ -13,23 +13,35 @@ const INITIALIZATION_TIMEOUT: float = 10.0
 const SYSTEM_CHECK_INTERVAL: float = 0.1
 
 # ============================================
+# 预加载脚本（解决编译顺序问题）
+# ============================================
+
+const _GameStateManagerScript := preload("res://src/core/GameStateManager.gd")
+const _SceneManagerScript := preload("res://src/core/SceneManager.gd")
+const _EventBusScript := preload("res://src/core/EventBus.gd")
+const _ConfigManagerScript := preload("res://src/core/ConfigManager.gd")
+const _SaveManagerScript := preload("res://src/save/SaveManager.gd")
+const _AchievementManagerScript := preload("res://src/achievements/AchievementManager.gd")
+const _AudioManagerScript := preload("res://src/audio/AudioManager.gd")
+
+# ============================================
 # 系统引用
 # ============================================
 
 ## 核心系统
-var game_state_manager: GameStateManager
-var scene_manager: SceneManager
-var event_bus: EventBus
-var config_manager: ConfigManager
+var game_state_manager: Node
+var scene_manager: Node
+var event_bus: Node
+var config_manager: Node
 
 ## 游戏系统
-var save_manager: SaveManager
-var achievement_manager: AchievementManager
-var audio_manager: AudioManager
+var save_manager: Node
+var achievement_manager: Node
+var audio_manager: Node
 
 ## 游戏玩法系统
-var mist_painting_system: MistPaintingSystem
-var player_controller: PlayerController
+var mist_painting_system: Node
+var player_controller: Node
 
 # ============================================
 # 状态变量
@@ -83,7 +95,7 @@ func _ready():
     # 开始初始化流程
     _start_initialization()
 
-func _process(delta: float):
+func _process(_delta: float):
     # 可以在这里添加初始化进度监控
     pass
 
@@ -97,10 +109,10 @@ func _start_initialization() -> void:
     initialization_started.emit()
     
     # 执行初始化步骤
-    await _initialize_core_systems()
-    await _initialize_game_systems()
-    await _initialize_gameplay_systems()
-    await _finalize_initialization()
+    _initialize_core_systems()
+    _initialize_game_systems()
+    _initialize_gameplay_systems()
+    _finalize_initialization()
 
 ## 初始化核心系统
 func _initialize_core_systems() -> void:
@@ -148,13 +160,13 @@ func _initialize_game_systems() -> void:
     _update_progress(0.3, "游戏系统")
     
     # 初始化存档系统
-    await _init_save_manager()
-    
+    _init_save_manager()
+
     # 初始化成就系统
-    await _init_achievement_manager()
-    
+    _init_achievement_manager()
+
     # 初始化音频系统
-    await _init_audio_manager()
+    _init_audio_manager()
     
     systems_ready["game"] = true
     current_init_state = InitState.GAME_SYSTEMS_READY
@@ -166,7 +178,7 @@ func _init_save_manager() -> void:
     print("GameInitializer: Initializing SaveManager...")
     _update_progress(0.35, "存档系统")
     
-    save_manager = SaveManager.new()
+    save_manager = _SaveManagerScript.new()
     save_manager.name = "SaveManager"
     add_child(save_manager)
     
@@ -181,7 +193,7 @@ func _init_achievement_manager() -> void:
     print("GameInitializer: Initializing AchievementManager...")
     _update_progress(0.45, "成就系统")
     
-    achievement_manager = AchievementManager.new()
+    achievement_manager = _AchievementManagerScript.new()
     achievement_manager.name = "AchievementManager"
     add_child(achievement_manager)
     
@@ -195,7 +207,7 @@ func _init_audio_manager() -> void:
     print("GameInitializer: Initializing AudioManager...")
     _update_progress(0.55, "音频系统")
     
-    audio_manager = AudioManager.new()
+    audio_manager = _AudioManagerScript.new()
     audio_manager.name = "AudioManager"
     add_child(audio_manager)
     
@@ -240,13 +252,37 @@ func _finalize_initialization() -> void:
     
     # 应用保存的设置
     _apply_saved_settings()
-    
+
     _update_progress(1.0, "完成")
     current_init_state = InitState.COMPLETE
-    
+
     print("GameInitializer: Initialization complete!")
     initialization_completed.emit()
     all_systems_ready.emit()
+
+    # 加载主菜单场景
+    _load_main_menu()
+
+## 加载主菜单
+func _load_main_menu() -> void:
+    print("GameInitializer: Loading main menu...")
+    var main_menu_scene = load("res://scenes/MainMenu.tscn")
+    if main_menu_scene:
+        # 直接切换场景，不使用 SceneManager 的 async 方法
+        # 使用 change_scene_to_packed 而不是 change_scene_to 以兼容 Godot 4.x
+        var packed_scene = main_menu_scene as PackedScene
+        if packed_scene:
+            get_tree().change_scene_to_packed(packed_scene)
+        else:
+            # 如果加载的不是 PackedScene，尝试直接实例化
+            var main_menu_instance = main_menu_scene.instantiate()
+            var root = get_tree().current_scene
+            if root:
+                for child in root.get_children():
+                    child.queue_free()
+                root.add_child(main_menu_instance)
+    else:
+        push_error("Failed to load main menu scene")
 
 # ============================================
 # 系统验证
@@ -265,11 +301,11 @@ func _verify_all_systems() -> bool:
     ]
     
     for system_info in required_systems:
-        var name = system_info[0]
+        var system_name = system_info[0]
         var system = system_info[1]
-        
+
         if system == null:
-            _fail_initialization("Required system not initialized: " + name)
+            _fail_initialization("Required system not initialized: " + system_name)
             return false
     
     return true
@@ -325,7 +361,7 @@ func _apply_saved_settings() -> void:
 # 事件回调
 # ============================================
 
-func _on_game_started(data: Dictionary) -> void:
+func _on_game_started(_data: Dictionary) -> void:
     print("GameInitializer: Game started")
 
 func _on_game_paused(data: Dictionary) -> void:
@@ -463,26 +499,26 @@ func quit_game() -> void:
 # ============================================
 
 ## 注册迷雾绘制系统
-func register_mist_painting_system(system: MistPaintingSystem) -> void:
+func register_mist_painting_system(system: Node) -> void:
     mist_painting_system = system
     print("GameInitializer: MistPaintingSystem registered")
 
 ## 注册玩家控制器
-func register_player_controller(player: PlayerController) -> void:
+func register_player_controller(player: Node) -> void:
     player_controller = player
-    
+
     # 连接玩家事件到迷雾系统
     if mist_painting_system:
         player.paint_started.connect(mist_painting_system.start_drawing)
         player.paint_ended.connect(mist_painting_system.end_drawing)
         player.paint_moved.connect(mist_painting_system.continue_drawing)
-    
+
     print("GameInitializer: PlayerController registered")
 
 ## 获取迷雾绘制系统
-func get_mist_painting_system() -> MistPaintingSystem:
+func get_mist_painting_system() -> Node:
     return mist_painting_system
 
 ## 获取玩家控制器
-func get_player_controller() -> PlayerController:
+func get_player_controller() -> Node:
     return player_controller

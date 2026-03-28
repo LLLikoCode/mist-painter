@@ -4,12 +4,16 @@
 class_name MainMenu
 extends Control
 
+const _GameStateManagerScript := preload("res://src/core/GameStateManager.gd")
+
 func _ready():
     print("MainMenu initialized")
-    
+
     # 设置游戏状态
-    AutoLoad.game_state.change_state(GameStateManager.GameState.MAIN_MENU)
-    
+    var gs = AutoLoad.game_state
+    if gs and gs.has_method("change_state"):
+        gs.change_state(_GameStateManagerScript.GameState.MAIN_MENU)
+
     # 检查是否有存档
     _check_save_data()
 

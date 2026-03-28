@@ -7,6 +7,14 @@ class_name UIAnimation
 extends RefCounted
 
 # ============================================
+# 内部辅助类
+# ============================================
+
+## 数值包装器类（用于 Tween 动画）
+class _ValueWrapper extends RefCounted:
+    var value: float = 0.0
+
+# ============================================
 # 动画类型枚举
 # ============================================
 
@@ -265,19 +273,21 @@ static func animate_value(
     callback: Callable = Callable(),
     ease_type: EaseType = EaseType.EASE_OUT
 ) -> Tween:
-    # 创建一个虚拟对象来存储数值
-    var obj := {"value": from_value}
-    var tween := _create_tween_for_object(obj, "value_animation")
-    
+    # 使用 RefCounted 类来存储数值
+    var value_wrapper = _ValueWrapper.new()
+    value_wrapper.value = from_value
+
+    var tween := _create_tween_for_object(value_wrapper, "value_animation")
+
     _apply_ease(tween, ease_type, Tween.TRANS_QUAD)
-    
+
     if callback.is_valid():
         tween.step_finished.connect(func(step: int):
-            callback.call(obj.value)
+            callback.call(value_wrapper.value)
         )
-    
-    tween.tween_property(obj, "value", to_value, duration)
-    
+
+    tween.tween_property(value_wrapper, "value", to_value, duration)
+
     return tween
 
 ## 颜色过渡动画

@@ -39,7 +39,7 @@ enum DisplayMode {
 @export var track_height: int = 8
 @export var grabber_size: int = 20
 @export var show_tick_marks: bool = false
-@export var tick_count: int = 5
+@export var custom_tick_count: int = 5
 
 # ============================================
 # 内部变量

@@ -137,10 +137,26 @@ func _exit_tree():
 
 ## 初始化音频总线索引
 func _init_bus_indices() -> void:
+	# 检查并创建音频总线
+	_ensure_bus_exists(BUS_MASTER, 0)  # Master 总是存在（索引 0）
+	_ensure_bus_exists(BUS_MUSIC, 1)
+	_ensure_bus_exists(BUS_SFX, 2)
+	_ensure_bus_exists(BUS_AMBIENT, 3)
+
+	# 获取总线索引
 	_bus_indices[BUS_MASTER] = AudioServer.get_bus_index(BUS_MASTER)
 	_bus_indices[BUS_MUSIC] = AudioServer.get_bus_index(BUS_MUSIC)
 	_bus_indices[BUS_SFX] = AudioServer.get_bus_index(BUS_SFX)
 	_bus_indices[BUS_AMBIENT] = AudioServer.get_bus_index(BUS_AMBIENT)
+
+## 确保总线存在（如果不存在则创建）
+func _ensure_bus_exists(bus_name: String, default_index: int) -> void:
+	var index = AudioServer.get_bus_index(bus_name)
+	if index == -1:
+		# 总线不存在，创建它
+		AudioServer.add_bus(default_index)
+		AudioServer.set_bus_name(default_index, bus_name)
+		print("AudioManager: Created audio bus '" + bus_name + "'")
 
 ## 初始化BGM播放器
 func _init_bgm_player() -> void:
@@ -531,28 +547,40 @@ func _fade_ambient_out(stop_after: bool = false, duration: float = -1.0) -> void
 
 ## 设置主音量
 func set_master_volume(volume: float) -> void:
-	master_volume = clamp(volume, 0.0, 1.0)
+	var clamped = clamp(volume, 0.0, 1.0)
+	if abs(master_volume - clamped) < 0.001:
+		return
+	master_volume = clamped
 	_apply_bus_volume(BUS_MASTER, master_volume)
 	volume_changed.emit(BUS_MASTER, master_volume)
 	_save_volume_settings()
 
 ## 设置音乐音量
 func set_music_volume(volume: float) -> void:
-	music_volume = clamp(volume, 0.0, 1.0)
+	var clamped = clamp(volume, 0.0, 1.0)
+	if abs(music_volume - clamped) < 0.001:
+		return
+	music_volume = clamped
 	_apply_bus_volume(BUS_MUSIC, music_volume)
 	volume_changed.emit(BUS_MUSIC, music_volume)
 	_save_volume_settings()
 
 ## 设置音效音量
 func set_sfx_volume(volume: float) -> void:
-	sfx_volume = clamp(volume, 0.0, 1.0)
+	var clamped = clamp(volume, 0.0, 1.0)
+	if abs(sfx_volume - clamped) < 0.001:
+		return
+	sfx_volume = clamped
 	_apply_bus_volume(BUS_SFX, sfx_volume)
 	volume_changed.emit(BUS_SFX, sfx_volume)
 	_save_volume_settings()
 
 ## 设置环境音音量
 func set_ambient_volume(volume: float) -> void:
-	ambient_volume = clamp(volume, 0.0, 1.0)
+	var clamped = clamp(volume, 0.0, 1.0)
+	if abs(ambient_volume - clamped) < 0.001:
+		return
+	ambient_volume = clamped
 	_apply_bus_volume(BUS_AMBIENT, ambient_volume)
 	volume_changed.emit(BUS_AMBIENT, ambient_volume)
 	_save_volume_settings()
@@ -572,9 +600,11 @@ func _apply_volumes() -> void:
 	_apply_bus_volume(BUS_MUSIC, music_volume)
 	_apply_bus_volume(BUS_SFX, sfx_volume)
 	_apply_bus_volume(BUS_AMBIENT, ambient_volume)
-	
+
 	# 设置静音状态
-	AudioServer.set_bus_mute(_bus_indices[BUS_MASTER], _is_muted)
+	var master_bus_idx = _bus_indices.get(BUS_MASTER, -1)
+	if master_bus_idx >= 0:
+		AudioServer.set_bus_mute(master_bus_idx, _is_muted)
 
 ## 保存音量设置
 func _save_volume_settings() -> void:
@@ -597,19 +627,23 @@ func toggle_mute() -> bool:
 func set_mute(muted: bool) -> void:
 	if _is_muted == muted:
 		return
-	
+
 	_is_muted = muted
-	
+
 	if muted:
 		# 保存当前音量并静音
 		_pre_mute_volumes = {
 			BUS_MASTER: master_volume,
 		}
-		AudioServer.set_bus_mute(_bus_indices[BUS_MASTER], true)
+		var master_bus_idx = _bus_indices.get(BUS_MASTER, -1)
+		if master_bus_idx >= 0:
+			AudioServer.set_bus_mute(master_bus_idx, true)
 	else:
 		# 恢复音量
-		AudioServer.set_bus_mute(_bus_indices[BUS_MASTER], false)
-	
+		var master_bus_idx = _bus_indices.get(BUS_MASTER, -1)
+		if master_bus_idx >= 0:
+			AudioServer.set_bus_mute(master_bus_idx, false)
+
 	mute_changed.emit(_is_muted)
 	_save_volume_settings()
 
@@ -720,7 +754,7 @@ func reset_to_default_volumes() -> void:
 func get_status() -> Dictionary:
 	return {
 		"bgm_playing": _bgm_player.playing if _bgm_player else false,
-		"current_bgm": _current_bgm.resource_path if _current_bgm else null,
+		"current_bgm": _current_bgm.resource_path if _current_bgm != null else "",
 		"ambient_playing": _ambient_player.playing if _ambient_player else false,
 		"active_sfx_count": _playing_sfx.size(),
 		"available_sfx_channels": _available_sfx_players.size(),

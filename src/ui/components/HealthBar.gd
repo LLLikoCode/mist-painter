@@ -46,7 +46,7 @@ func _create_layout() -> void:
         icon_texture = TextureRect.new()
         icon_texture.name = "Icon"
         icon_texture.custom_minimum_size = Vector2(24, 24)
-        icon_texture.expand_mode = TextureRect.EXPAND_FIT_SIZE
+        icon_texture.expand_mode = 3
         icon_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
         # TODO: 加载生命值图标
         # icon_texture.texture = load("res://assets/ui/icons/health.png")
@@ -122,15 +122,16 @@ func _animate_health_change(from_value: float, to_value: float) -> void:
     var tween = create_tween()
     tween.set_ease(Tween.EASE_OUT)
     tween.set_trans(Tween.TRANS_QUAD)
-    
-    var obj = {"value": from_value}
-    tween.tween_property(obj, "value", to_value, 0.3)
-    
+
+    var wrapper = RefCounted.new()
+    wrapper.set("value", from_value)
+    tween.tween_property(wrapper, "value", to_value, 0.3)
+
     tween.step_finished.connect(func(step: int):
-        current_health = obj.value
+        current_health = wrapper.get("value")
         _update_display()
     )
-    
+
     await tween.finished
     current_health = to_value
     _update_display()

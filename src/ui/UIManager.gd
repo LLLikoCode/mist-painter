@@ -5,6 +5,15 @@
 class_name UIManager
 extends Node
 
+# ============================================
+# 预加载脚本（解决编译顺序问题）
+# ============================================
+
+const _ThemeManagerScript := preload("res://src/ui/ThemeManager.gd")
+const _LocalizationManagerScript := preload("res://src/ui/LocalizationManager.gd")
+const _NavigationManagerScript := preload("res://src/ui/NavigationManager.gd")
+const _AnimationManagerScript := preload("res://src/ui/AnimationManager.gd")
+
 # 单例实例
 static var instance: UIManager = null
 
@@ -62,22 +71,22 @@ func _ready():
 
 func _init_managers() -> void:
     ## 初始化主题管理器
-    theme_manager = ThemeManager.new()
+    theme_manager = _ThemeManagerScript.new()
     theme_manager.name = "ThemeManager"
     add_child(theme_manager)
     
     ## 初始化本地化管理器
-    localization_manager = LocalizationManager.new()
+    localization_manager = _LocalizationManagerScript.new()
     localization_manager.name = "LocalizationManager"
     add_child(localization_manager)
     
     ## 初始化导航管理器
-    navigation_manager = NavigationManager.new()
+    navigation_manager = _NavigationManagerScript.new()
     navigation_manager.name = "NavigationManager"
     add_child(navigation_manager)
     
     ## 初始化动画管理器
-    animation_manager = AnimationManager.new()
+    animation_manager = _AnimationManagerScript.new()
     animation_manager.name = "AnimationManager"
     add_child(animation_manager)
 
@@ -193,40 +202,50 @@ func _get_ui_layer() -> CanvasLayer:
 
 ## 显示提示消息
 func show_toast(message: String, duration: float = 3.0) -> void:
-    var toast = preload("res://src/ui/components/ToastNotification.tscn").instantiate()
+    var toast_scene = load("res://src/ui/components/ToastNotification.tscn")
+    if toast_scene == null:
+        print("[UIManager] Toast notification scene not loaded, skipping toast: " + message)
+        return
+
+    var toast = toast_scene.instantiate()
     toast.message = message
     toast.duration = duration
-    
+
     var ui_layer = _get_ui_layer()
     if ui_layer:
         ui_layer.add_child(toast)
     else:
         add_child(toast)
-    
+
     toast.show_notification()
 
 ## 显示对话框
-func show_dialog(title: String, message: String, 
+func show_dialog(title: String, message: String,
                  confirm_text: String = "确定", cancel_text: String = "",
                  on_confirm: Callable = Callable(), on_cancel: Callable = Callable()) -> void:
-    var dialog = preload("res://src/ui/components/DialogBox.tscn").instantiate()
+    var dialog_scene = load("res://src/ui/components/DialogBox.tscn")
+    if dialog_scene == null:
+        print("[UIManager] Dialog box scene not loaded, skipping dialog: " + title)
+        return
+
+    var dialog = dialog_scene.instantiate()
     dialog.title = title
     dialog.message = message
     dialog.confirm_text = confirm_text
     dialog.cancel_text = cancel_text
     dialog.on_confirm = on_confirm
     dialog.on_cancel = on_cancel
-    
+
     var ui_layer = _get_ui_layer()
     if ui_layer:
         ui_layer.add_child(dialog)
     else:
         add_child(dialog)
-    
+
     dialog.show_dialog()
 
 ## 获取本地化文本
-func tr(key: String) -> String:
+func localize(key: String) -> String:
     if localization_manager:
         return localization_manager.get_text(key)
     return key
@@ -262,3 +281,7 @@ func cleanup() -> void:
     screen_instances.clear()
     current_screen = UIScreen.NONE
     previous_screen = UIScreen.NONE
+
+func _exit_tree():
+    if instance == self:
+        instance = null

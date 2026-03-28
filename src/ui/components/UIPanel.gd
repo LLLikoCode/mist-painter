@@ -276,3 +276,4 @@ func add_content(child: Node) -> void:
 func clear_content() -> void:
     if _content_container != null:
         for child in _content_container.get_children():
+            child.queue_free()

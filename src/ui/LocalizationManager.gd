@@ -200,7 +200,7 @@ func get_text(key: String, params: Dictionary = {}) -> String:
     return text
 
 ## 快捷翻译方法
-func tr(key: String, params: Dictionary = {}) -> String:
+func localize(key: String, params: Dictionary = {}) -> String:
     return get_text(key, params)
 
 ## 获取可用语言列表

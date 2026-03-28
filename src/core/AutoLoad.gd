@@ -5,19 +5,31 @@
 extends Node
 
 # ============================================
+# 预加载脚本（解决编译顺序问题）
+# ============================================
+
+const _GameStateManagerScript := preload("res://src/core/GameStateManager.gd")
+const _SceneManagerScript := preload("res://src/core/SceneManager.gd")
+const _EventBusScript := preload("res://src/core/EventBus.gd")
+const _ConfigManagerScript := preload("res://src/core/ConfigManager.gd")
+const _SaveManagerScript := preload("res://src/save/SaveManager.gd")
+const _AchievementManagerScript := preload("res://src/achievements/AchievementManager.gd")
+const _AudioManagerScript := preload("res://src/audio/AudioManager.gd")
+
+# ============================================
 # 全局管理器引用
 # ============================================
 
 ## 核心系统
-var game_state: GameStateManager
-var scene_manager: SceneManager
-var event_bus: EventBus
-var config_manager: ConfigManager
+var game_state: Node
+var scene_manager: Node
+var event_bus: Node
+var config_manager: Node
 
 ## 游戏系统（由GameInitializer创建）
-var save_manager: SaveManager = null
-var achievement_manager: AchievementManager = null
-var audio_manager: AudioManager = null
+var save_manager: Node = null
+var achievement_manager: Node = null
+var audio_manager: Node = null
 var game_initializer: Node = null
 
 ## 游戏玩法系统（运行时设置）
@@ -43,22 +55,22 @@ func _ready():
 ## 初始化核心管理器
 func _init_core_managers() -> void:
 	# 创建并添加GameStateManager
-	game_state = GameStateManager.new()
+	game_state = _GameStateManagerScript.new()
 	game_state.name = "GameStateManager"
 	add_child(game_state)
 	
 	# 创建并添加SceneManager
-	scene_manager = SceneManager.new()
+	scene_manager = _SceneManagerScript.new()
 	scene_manager.name = "SceneManager"
 	add_child(scene_manager)
 	
 	# 创建并添加EventBus
-	event_bus = EventBus.new()
+	event_bus = _EventBusScript.new()
 	event_bus.name = "EventBus"
 	add_child(event_bus)
 	
 	# 创建并添加ConfigManager
-	config_manager = ConfigManager.new()
+	config_manager = _ConfigManagerScript.new()
 	config_manager.name = "ConfigManager"
 	add_child(config_manager)
 
@@ -66,29 +78,29 @@ func _init_core_managers() -> void:
 # 快捷访问方法 - 核心系统
 # ============================================
 
-func get_game_state() -> GameStateManager:
+func get_game_state() -> Node:
 	return game_state
 
-func get_scene_manager() -> SceneManager:
+func get_scene_manager() -> Node:
 	return scene_manager
 
-func get_event_bus() -> EventBus:
+func get_event_bus() -> Node:
 	return event_bus
 
-func get_config() -> ConfigManager:
+func get_config() -> Node:
 	return config_manager
 
 # ============================================
 # 快捷访问方法 - 游戏系统
 # ============================================
 
-func get_save_manager() -> SaveManager:
+func get_save_manager() -> Node:
 	return save_manager
 
-func get_achievement_manager() -> AchievementManager:
+func get_achievement_manager() -> Node:
 	return achievement_manager
 
-func get_audio_manager() -> AudioManager:
+func get_audio_manager() -> Node:
 	return audio_manager
 
 func get_game_initializer() -> Node:
@@ -109,15 +121,15 @@ func get_player_controller() -> Node:
 # ============================================
 
 ## 注册存档管理器
-func register_save_manager(manager: SaveManager) -> void:
+func register_save_manager(manager: Node) -> void:
 	save_manager = manager
 
 ## 注册成就管理器
-func register_achievement_manager(manager: AchievementManager) -> void:
+func register_achievement_manager(manager: Node) -> void:
 	achievement_manager = manager
 
 ## 注册音频管理器
-func register_audio_manager(manager: AudioManager) -> void:
+func register_audio_manager(manager: Node) -> void:
 	audio_manager = manager
 
 ## 注册游戏初始化器

@@ -58,10 +58,10 @@ func _setup_input_map() -> void:
         escape_event.keycode = KEY_ESCAPE
         InputMap.action_add_event("ui_pause", escape_event)
 
-func _process(delta: float):
+func _process(_delta: float):
     # 检测输入设备变化
     _detect_input_device()
-    
+
     # 处理导航输入
     _handle_navigation_input()
 
@@ -74,7 +74,7 @@ func _detect_input_device() -> void:
     
     # 检测键盘输入
     for key in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_ENTER, KEY_ESCAPE]:
-        if Input.is_key_just_pressed(key):
+        if Input.is_action_just_pressed("ui_focus_" + str(key)) or Input.is_key_pressed(key):
             new_mode = NavigationMode.KEYBOARD
             break
     

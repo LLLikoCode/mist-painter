@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8yvxg3ulq3a6"]
+[gd_scene load_steps=3 format=3 uid="uid://c8yvxg3ulq3a6"]
 
 [ext_resource type="Script" path="res://src/core/AutoLoad.gd" id="1_autoload"]
+[ext_resource type="Script" path="res://src/core/GameInitializer.gd" id="2_initializer"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_autoload")
+
+[node name="GameInitializer" type="Node" parent="."]
+script = ExtResource("2_initializer")

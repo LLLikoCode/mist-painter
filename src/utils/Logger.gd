@@ -2,7 +2,7 @@
 ## 日志工具类
 ## 提供统一的日志记录功能
 
-class_name Logger
+class_name AppLogger
 extends RefCounted
 
 # 日志级别

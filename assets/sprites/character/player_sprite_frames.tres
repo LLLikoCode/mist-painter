@@ -1,0 +1,27 @@
+[gd_resource type="SpriteFrames" load_steps=9 format=3 uid="uid://player_sprite_frames"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/character/character_idle.png" id="1_texture_idle"]
+[ext_resource type="Texture2D" path="res://assets/sprites/character/character_walk.png" id="2_texture_walk"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_player"]
+
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_texture_idle")
+}],
+"loop": true,
+"name": &"idle_down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_texture_walk")
+}],
+"loop": true,
+"name": &"walk_down",
+"speed": 8.0
+}]
+
+[resource]
+animations = [{"duration": 1.0, "loop": true, "name": &"idle_down", "speed": 8.0, "track_mode": 0, "frames": [{"texture": ExtResource("1_texture_idle"), "duration": 1.0}]}, {"duration": 1.0, "loop": true, "name": &"walk_down", "speed": 8.0, "track_mode": 0, "frames": [{"texture": ExtResource("2_texture_walk"), "duration": 1.0}]}]

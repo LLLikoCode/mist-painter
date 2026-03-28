@@ -1,7 +1,27 @@
 {
   "permissions": {
     "allow": [
-      "Bash(godot --headless --check-only)"
+      "Bash(godot --headless --check-only)",
+      "Bash(ls -la *.gd)",
+      "Bash(wc -l *.gd)",
+      "Bash(cd:*)",
+      "Bash(xargs wc:*)",
+      "Bash(find . -name \"*.gd\" -type f -exec wc -l {})",
+      "Bash(grep -n \"uid=\" scenes/*.tscn)",
+      "Read(//d/Program/Godot//**)",
+      "Read(//c/Program Files/**)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --check-only --project-manager)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --headless --validate-project-files)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --headless --build-solutions)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --headless --path \"D:/GodotProject/mist-painter\" --script \"res://src/core/GameInitializer.gd\")",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --path \"D:/GodotProject/mist-painter\" --check-only)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --path \"D:/GodotProject/mist-painter\" --quit)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --path \"D:/GodotProject/mist-painter\" --main-loop 1)",
+      "Bash(\"/d/Program/Godot/Godot_v4.6.1-stable_win64.exe\" --path \"D:/GodotProject/mist-painter\")",
+      "Bash(rm -f assets/**/*.import)",
+      "Bash(rm -f assets/**/**/*.import)",
+      "Bash(where Godot)",
+      "Bash(find 'C:/Program Files' -name Godot*.exe)"
     ]
   }
 }

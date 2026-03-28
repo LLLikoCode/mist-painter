@@ -11,22 +11,22 @@ extends Node2D
 
 ## 谜题类型
 enum PuzzleType {
-    SWITCH,         # 开关谜题
-    SEQUENCE,       # 序列谜题
-    PATH_DRAWING,   # 路径绘制
-    SYMBOL_MATCH,   # 符号匹配
-    LIGHT_MIRROR,   # 光线反射
-    PRESSURE_PLATE, # 压力板
-    COMBINATION     # 组合谜题
+	SWITCH,         # 开关谜题
+	SEQUENCE,       # 序列谜题
+	PATH_DRAWING,   # 路径绘制
+	SYMBOL_MATCH,   # 符号匹配
+	LIGHT_MIRROR,   # 光线反射
+	PRESSURE_PLATE, # 压力板
+	COMBINATION     # 组合谜题
 }
 
 ## 谜题状态
 enum PuzzleState {
-    LOCKED,         # 锁定
-    ACTIVE,         # 激活中
-    SOLVED,         # 已解决
-    FAILED,         # 失败
-    UNLOCKED        # 已解锁（待激活）
+	LOCKED,         # 锁定
+	ACTIVE,         # 激活中
+	SOLVED,         # 已解决
+	FAILED,         # 失败
+	UNLOCKED        # 已解锁（待激活）
 }
 
 # ============================================
@@ -90,374 +90,374 @@ signal progress_updated(progress: float)
 # ============================================
 
 func _ready():
-    if interaction_area:
-        interaction_area.collision_layer = 0
-        interaction_area.collision_mask = 1
-        interaction_area.body_entered.connect(_on_player_entered)
-        interaction_area.body_exited.connect(_on_player_exited)
-    
-    _initialize_puzzle()
-    print("PuzzleController initialized: %s" % puzzle_id)
+	if interaction_area:
+		interaction_area.collision_layer = 0
+		interaction_area.collision_mask = 1
+		interaction_area.body_entered.connect(_on_player_entered)
+		interaction_area.body_exited.connect(_on_player_exited)
+	
+	_initialize_puzzle()
+	print("PuzzleController initialized: %s" % puzzle_id)
 
 func _process(delta: float):
-    if is_timing and current_state == PuzzleState.ACTIVE:
-        puzzle_timer += delta
-        if time_limit > 0 and puzzle_timer >= time_limit:
-            _on_time_expired()
+	if is_timing and current_state == PuzzleState.ACTIVE:
+		puzzle_timer += delta
+		if time_limit > 0 and puzzle_timer >= time_limit:
+			_on_time_expired()
 
 # ============================================
 # 初始化
 # ============================================
 
 func _initialize_puzzle() -> void:
-    if puzzle_id == "":
-        puzzle_id = "puzzle_%d_%d" % [get_instance_id(), Time.get_ticks_msec()]
-    
-    match puzzle_type:
-        PuzzleType.SWITCH:
-            puzzle_data = {"switches": [], "target_states": []}
-        PuzzleType.SEQUENCE:
-            puzzle_data = {"sequence": [], "player_sequence": [], "max_length": 5}
-        PuzzleType.PATH_DRAWING:
-            puzzle_data = {"start_point": Vector2.ZERO, "end_point": Vector2.ZERO, "waypoints": [], "tolerance": 30.0}
-        PuzzleType.SYMBOL_MATCH:
-            puzzle_data = {"symbols": [], "matches_required": 3}
-        PuzzleType.LIGHT_MIRROR:
-            puzzle_data = {"mirrors": [], "light_source": Vector2.ZERO, "target": Vector2.ZERO}
-        PuzzleType.PRESSURE_PLATE:
-            puzzle_data = {"plates": [], "activation_order": [], "current_order": []}
-        PuzzleType.COMBINATION:
-            puzzle_data = {"sub_puzzles": [], "solved_count": 0}
-    
-    _check_dependencies()
+	if puzzle_id == "":
+		puzzle_id = "puzzle_%d_%d" % [get_instance_id(), Time.get_ticks_msec()]
+	
+	match puzzle_type:
+		PuzzleType.SWITCH:
+			puzzle_data = {"switches": [], "target_states": []}
+		PuzzleType.SEQUENCE:
+			puzzle_data = {"sequence": [], "player_sequence": [], "max_length": 5}
+		PuzzleType.PATH_DRAWING:
+			puzzle_data = {"start_point": Vector2.ZERO, "end_point": Vector2.ZERO, "waypoints": [], "tolerance": 30.0}
+		PuzzleType.SYMBOL_MATCH:
+			puzzle_data = {"symbols": [], "matches_required": 3}
+		PuzzleType.LIGHT_MIRROR:
+			puzzle_data = {"mirrors": [], "light_source": Vector2.ZERO, "target": Vector2.ZERO}
+		PuzzleType.PRESSURE_PLATE:
+			puzzle_data = {"plates": [], "activation_order": [], "current_order": []}
+		PuzzleType.COMBINATION:
+			puzzle_data = {"sub_puzzles": [], "solved_count": 0}
+	
+	_check_dependencies()
 
 # ============================================
 # 状态管理
 # ============================================
 
 func set_state(new_state: PuzzleState) -> void:
-    if current_state == new_state:
-        return
-    
-    var old_state = current_state
-    current_state = new_state
-    state_changed.emit(new_state, old_state)
-    
-    match new_state:
-        PuzzleState.ACTIVE:
-            is_timing = true
-        PuzzleState.SOLVED:
-            is_timing = false
-            _notify_connected_puzzles()
-            AutoLoad.event_bus.emit(EventBus.EventType.PUZZLE_SOLVED, {"puzzle_id": puzzle_id})
-        PuzzleState.FAILED:
-            is_timing = false
-            if show_hint_on_fail and hint_text != "":
-                _show_hint()
-            AutoLoad.event_bus.emit(EventBus.EventType.PUZZLE_FAILED, {"puzzle_id": puzzle_id})
+	if current_state == new_state:
+		return
+	
+	var old_state = current_state
+	current_state = new_state
+	state_changed.emit(new_state, old_state)
+	
+	match new_state:
+		PuzzleState.ACTIVE:
+			is_timing = true
+		PuzzleState.SOLVED:
+			is_timing = false
+			_notify_connected_puzzles()
+			AutoLoad.event_bus.emit(EventBus.EventType.PUZZLE_SOLVED, {"puzzle_id": puzzle_id})
+		PuzzleState.FAILED:
+			is_timing = false
+			if show_hint_on_fail and hint_text != "":
+				_show_hint()
+			AutoLoad.event_bus.emit(EventBus.EventType.PUZZLE_FAILED, {"puzzle_id": puzzle_id})
 
 func unlock() -> void:
-    if current_state == PuzzleState.LOCKED:
-        set_state(PuzzleState.UNLOCKED)
-        puzzle_unlocked.emit()
+	if current_state == PuzzleState.LOCKED:
+		set_state(PuzzleState.UNLOCKED)
+		puzzle_unlocked.emit()
 
 func activate() -> void:
-    if current_state == PuzzleState.LOCKED:
-        unlock()
-    if current_state == PuzzleState.UNLOCKED or current_state == PuzzleState.FAILED:
-        set_state(PuzzleState.ACTIVE)
-        puzzle_activated.emit()
+	if current_state == PuzzleState.LOCKED:
+		unlock()
+	if current_state == PuzzleState.UNLOCKED or current_state == PuzzleState.FAILED:
+		set_state(PuzzleState.ACTIVE)
+		puzzle_activated.emit()
 
 func reset_puzzle() -> void:
-    attempt_count = 0
-    puzzle_timer = 0.0
-    is_timing = false
-    current_input.clear()
-    _reset_puzzle_data()
-    set_state(PuzzleState.UNLOCKED)
-    puzzle_reset.emit()
+	attempt_count = 0
+	puzzle_timer = 0.0
+	is_timing = false
+	current_input.clear()
+	_reset_puzzle_data()
+	set_state(PuzzleState.UNLOCKED)
+	puzzle_reset.emit()
 
 func _reset_puzzle_data() -> void:
-    match puzzle_type:
-        PuzzleType.SEQUENCE:
-            puzzle_data["player_sequence"] = []
-        PuzzleType.PRESSURE_PLATE:
-            puzzle_data["current_order"] = []
-        PuzzleType.PATH_DRAWING:
-            puzzle_data["drawn_path"] = []
+	match puzzle_type:
+		PuzzleType.SEQUENCE:
+			puzzle_data["player_sequence"] = []
+		PuzzleType.PRESSURE_PLATE:
+			puzzle_data["current_order"] = []
+		PuzzleType.PATH_DRAWING:
+			puzzle_data["drawn_path"] = []
 
 # ============================================
 # 谜题逻辑
 # ============================================
 
 func check_solution() -> bool:
-    var is_correct = false
-    
-    match puzzle_type:
-        PuzzleType.SWITCH:
-            is_correct = _check_switch_solution()
-        PuzzleType.SEQUENCE:
-            is_correct = _check_sequence_solution()
-        PuzzleType.PATH_DRAWING:
-            is_correct = _check_path_solution()
-        PuzzleType.PRESSURE_PLATE:
-            is_correct = _check_pressure_solution()
-        PuzzleType.COMBINATION:
-            is_correct = _check_combination_solution()
-        _:
-            is_correct = true
-    
-    if is_correct:
-        set_state(PuzzleState.SOLVED)
-        puzzle_solved.emit()
-    else:
-        attempt_count += 1
-        if max_attempts > 0 and attempt_count >= max_attempts:
-            set_state(PuzzleState.FAILED)
-            puzzle_failed.emit()
-        else:
-            current_input.clear()
-            _reset_puzzle_data()
-            progress_updated.emit(0.0)
-    
-    return is_correct
+	var is_correct = false
+	
+	match puzzle_type:
+		PuzzleType.SWITCH:
+			is_correct = _check_switch_solution()
+		PuzzleType.SEQUENCE:
+			is_correct = _check_sequence_solution()
+		PuzzleType.PATH_DRAWING:
+			is_correct = _check_path_solution()
+		PuzzleType.PRESSURE_PLATE:
+			is_correct = _check_pressure_solution()
+		PuzzleType.COMBINATION:
+			is_correct = _check_combination_solution()
+		_:
+			is_correct = true
+	
+	if is_correct:
+		set_state(PuzzleState.SOLVED)
+		puzzle_solved.emit()
+	else:
+		attempt_count += 1
+		if max_attempts > 0 and attempt_count >= max_attempts:
+			set_state(PuzzleState.FAILED)
+			puzzle_failed.emit()
+		else:
+			current_input.clear()
+			_reset_puzzle_data()
+			progress_updated.emit(0.0)
+	
+	return is_correct
 
 func _check_switch_solution() -> bool:
-    var switches = puzzle_data.get("switches", [])
-    var target = puzzle_data.get("target_states", [])
-    for i in range(min(switches.size(), target.size())):
-        if switches[i] != target[i]:
-            return false
-    return true
+	var switches = puzzle_data.get("switches", [])
+	var target = puzzle_data.get("target_states", [])
+	for i in range(min(switches.size(), target.size())):
+		if switches[i] != target[i]:
+			return false
+	return true
 
 func _check_sequence_solution() -> bool:
-    return puzzle_data.get("player_sequence", []) == puzzle_data.get("sequence", [])
+	return puzzle_data.get("player_sequence", []) == puzzle_data.get("sequence", [])
 
 func _check_path_solution() -> bool:
-    var waypoints = puzzle_data.get("waypoints", [])
-    var drawn_path = puzzle_data.get("drawn_path", [])
-    var tolerance = puzzle_data.get("tolerance", 30.0)
-    
-    if drawn_path.size() < waypoints.size():
-        return false
-    
-    for i in range(waypoints.size()):
-        var closest_dist = INF
-        for point in drawn_path:
-            closest_dist = min(closest_dist, point.distance_to(waypoints[i]))
-        if closest_dist > tolerance:
-            return false
-    return true
+	var waypoints = puzzle_data.get("waypoints", [])
+	var drawn_path = puzzle_data.get("drawn_path", [])
+	var tolerance = puzzle_data.get("tolerance", 30.0)
+	
+	if drawn_path.size() < waypoints.size():
+		return false
+	
+	for i in range(waypoints.size()):
+		var closest_dist = INF
+		for point in drawn_path:
+			closest_dist = min(closest_dist, point.distance_to(waypoints[i]))
+		if closest_dist > tolerance:
+			return false
+	return true
 
 func _check_pressure_solution() -> bool:
-    return puzzle_data.get("current_order", []) == puzzle_data.get("activation_order", [])
+	return puzzle_data.get("current_order", []) == puzzle_data.get("activation_order", [])
 
 func _check_combination_solution() -> bool:
-    var sub_puzzles = puzzle_data.get("sub_puzzles", [])
-    var solved = puzzle_data.get("solved_count", 0)
-    return solved >= sub_puzzles.size()
+	var sub_puzzles = puzzle_data.get("sub_puzzles", [])
+	var solved = puzzle_data.get("solved_count", 0)
+	return solved >= sub_puzzles.size()
 
 func _on_time_expired() -> void:
-    set_state(PuzzleState.FAILED)
-    puzzle_failed.emit()
+	set_state(PuzzleState.FAILED)
+	puzzle_failed.emit()
 
 # ============================================
 # 输入处理
 # ============================================
 
 func receive_input(input_data: Dictionary) -> void:
-    if current_state != PuzzleState.ACTIVE:
-        return
-    
-    current_input = input_data
-    
-    match puzzle_type:
-        PuzzleType.SWITCH:
-            _handle_switch_input(input_data)
-        PuzzleType.SEQUENCE:
-            _handle_sequence_input(input_data)
-        PuzzleType.PATH_DRAWING:
-            _handle_path_input(input_data)
-        PuzzleType.PRESSURE_PLATE:
-            _handle_pressure_input(input_data)
-    
-    _update_progress()
+	if current_state != PuzzleState.ACTIVE:
+		return
+	
+	current_input = input_data
+	
+	match puzzle_type:
+		PuzzleType.SWITCH:
+			_handle_switch_input(input_data)
+		PuzzleType.SEQUENCE:
+			_handle_sequence_input(input_data)
+		PuzzleType.PATH_DRAWING:
+			_handle_path_input(input_data)
+		PuzzleType.PRESSURE_PLATE:
+			_handle_pressure_input(input_data)
+	
+	_update_progress()
 
 func _handle_switch_input(input_data: Dictionary) -> void:
-    var switch_index = input_data.get("switch_index", 0)
-    var switches = puzzle_data.get("switches", [])
-    if switch_index < switches.size():
-        switches[switch_index] = not switches[switch_index]
-        check_solution()
+	var switch_index = input_data.get("switch_index", 0)
+	var switches = puzzle_data.get("switches", [])
+	if switch_index < switches.size():
+		switches[switch_index] = not switches[switch_index]
+		check_solution()
 
 func _handle_sequence_input(input_data: Dictionary) -> void:
-    var value = input_data.get("value", 0)
-    var player_seq = puzzle_data.get("player_sequence", [])
-    var target_seq = puzzle_data.get("sequence", [])
-    
-    player_seq.append(value)
-    
-    if player_seq.size() >= target_seq.size():
-        check_solution()
-    else:
-        for i in range(player_seq.size()):
-            if player_seq[i] != target_seq[i]:
-                attempt_count += 1
-                current_input.clear()
-                _reset_puzzle_data()
-                return
+	var value = input_data.get("value", 0)
+	var player_seq = puzzle_data.get("player_sequence", [])
+	var target_seq = puzzle_data.get("sequence", [])
+	
+	player_seq.append(value)
+	
+	if player_seq.size() >= target_seq.size():
+		check_solution()
+	else:
+		for i in range(player_seq.size()):
+			if player_seq[i] != target_seq[i]:
+				attempt_count += 1
+				current_input.clear()
+				_reset_puzzle_data()
+				return
 
 func _handle_path_input(input_data: Dictionary) -> void:
-    var point = input_data.get("point", Vector2.ZERO)
-    var drawn_path = puzzle_data.get("drawn_path", [])
-    drawn_path.append(point)
+	var point = input_data.get("point", Vector2.ZERO)
+	var drawn_path = puzzle_data.get("drawn_path", [])
+	drawn_path.append(point)
 
 func _handle_pressure_input(input_data: Dictionary) -> void:
-    var plate_id = input_data.get("plate_id", "")
-    var current_order = puzzle_data.get("current_order", [])
-    var target = puzzle_data.get("activation_order", [])
-    
-    current_order.append(plate_id)
-    
-    if current_order.size() <= target.size():
-        var index = current_order.size() - 1
-        if current_order[index] != target[index]:
-            attempt_count += 1
-            current_input.clear()
-            _reset_puzzle_data()
-            return
-    
-    if current_order.size() >= target.size():
-        check_solution()
+	var plate_id = input_data.get("plate_id", "")
+	var current_order = puzzle_data.get("current_order", [])
+	var target = puzzle_data.get("activation_order", [])
+	
+	current_order.append(plate_id)
+	
+	if current_order.size() <= target.size():
+		var index = current_order.size() - 1
+		if current_order[index] != target[index]:
+			attempt_count += 1
+			current_input.clear()
+			_reset_puzzle_data()
+			return
+	
+	if current_order.size() >= target.size():
+		check_solution()
 
 func _update_progress() -> void:
-    var progress = 0.0
-    match puzzle_type:
-        PuzzleType.SEQUENCE:
-            var player_seq = puzzle_data.get("player_sequence", [])
-            var target = puzzle_data.get("sequence", [])
-            if target.size() > 0:
-                progress = float(player_seq.size()) / target.size()
-        PuzzleType.PRESSURE_PLATE:
-            var current = puzzle_data.get("current_order", [])
-            var target = puzzle_data.get("activation_order", [])
-            if target.size() > 0:
-                progress = float(current.size()) / target.size()
-    progress_updated.emit(progress)
+	var progress = 0.0
+	match puzzle_type:
+		PuzzleType.SEQUENCE:
+			var player_seq = puzzle_data.get("player_sequence", [])
+			var target = puzzle_data.get("sequence", [])
+			if target.size() > 0:
+				progress = float(player_seq.size()) / target.size()
+		PuzzleType.PRESSURE_PLATE:
+			var current = puzzle_data.get("current_order", [])
+			var target = puzzle_data.get("activation_order", [])
+			if target.size() > 0:
+				progress = float(current.size()) / target.size()
+	progress_updated.emit(progress)
 
 # ============================================
 # 依赖和连接
 # ============================================
 
 func _check_dependencies() -> void:
-    if required_puzzles.is_empty():
-        unlock()
-        return
-    for puzzle in required_puzzles:
-        if puzzle.current_state != PuzzleState.SOLVED:
-            return
-    unlock()
+	if required_puzzles.is_empty():
+		unlock()
+		return
+	for puzzle in required_puzzles:
+		if puzzle.current_state != PuzzleState.SOLVED:
+			return
+	unlock()
 
 func add_required_puzzle(puzzle: PuzzleController) -> void:
-    if puzzle not in required_puzzles:
-        required_puzzles.append(puzzle)
-        puzzle.puzzle_solved.connect(_check_dependencies)
+	if puzzle not in required_puzzles:
+		required_puzzles.append(puzzle)
+		puzzle.puzzle_solved.connect(_check_dependencies)
 
 func add_connected_puzzle(puzzle: PuzzleController) -> void:
-    if puzzle not in connected_puzzles:
-        connected_puzzles.append(puzzle)
+	if puzzle not in connected_puzzles:
+		connected_puzzles.append(puzzle)
 
 func _notify_connected_puzzles() -> void:
-    for puzzle in connected_puzzles:
-        if puzzle.has_method("on_connected_puzzle_solved"):
-            puzzle.on_connected_puzzle_solved(self)
+	for puzzle in connected_puzzles:
+		if puzzle.has_method("on_connected_puzzle_solved"):
+			puzzle.on_connected_puzzle_solved(self)
 
-func on_connected_puzzle_solved(solved_puzzle: PuzzleController) -> void:
-    pass
+func on_connected_puzzle_solved(_solved_puzzle: PuzzleController) -> void:
+	pass
 
 # ============================================
 # 交互
 # ============================================
 
 func _on_player_entered(body: Node) -> void:
-    if body is PlayerController and current_state == PuzzleState.UNLOCKED:
-        pass
+	if body is PlayerController and current_state == PuzzleState.UNLOCKED:
+		pass
 
 func _on_player_exited(body: Node) -> void:
-    if body is PlayerController:
-        pass
+	if body.name == "Player":
+		pass
 
-func interact(player: PlayerController) -> void:
-    if current_state == PuzzleState.LOCKED:
-        return
-    if current_state == PuzzleState.UNLOCKED or current_state == PuzzleState.FAILED:
-        activate()
-        return
-    if current_state == PuzzleState.ACTIVE:
-        _handle_interaction(player)
+func interact(player: Node) -> void:
+	if current_state == PuzzleState.LOCKED:
+		return
+	if current_state == PuzzleState.UNLOCKED or current_state == PuzzleState.FAILED:
+		activate()
+		return
+	if current_state == PuzzleState.ACTIVE:
+		_handle_interaction(player)
 
-func _handle_interaction(player: PlayerController) -> void:
-    pass
+func _handle_interaction(player: Node) -> void:
+	pass
 
 func can_interact() -> bool:
-    return current_state != PuzzleState.LOCKED and current_state != PuzzleState.SOLVED
+	return current_state != PuzzleState.LOCKED and current_state != PuzzleState.SOLVED
 
 func show_interaction_hint() -> void:
-    pass
+	pass
 
 func hide_interaction_hint() -> void:
-    pass
+	pass
 
 # ============================================
 # 视觉
 # ============================================
 
 func _show_hint() -> void:
-    if hint_label:
-        hint_label.text = hint_text
-        hint_label.visible = true
+	if hint_label:
+		hint_label.text = hint_text
+		hint_label.visible = true
 
 # ============================================
 # 公共方法
 # ============================================
 
 func get_current_state() -> PuzzleState:
-    return current_state
+	return current_state
 
 func get_attempt_count() -> int:
-    return attempt_count
+	return attempt_count
 
 func get_elapsed_time() -> float:
-    return puzzle_timer
+	return puzzle_timer
 
 func is_solved() -> bool:
-    return current_state == PuzzleState.SOLVED
+	return current_state == PuzzleState.SOLVED
 
 func get_progress() -> float:
-    match puzzle_type:
-        PuzzleType.SEQUENCE:
-            var player_seq = puzzle_data.get("player_sequence", [])
-            var target = puzzle_data.get("sequence", [])
-            if target.size() > 0:
-                return float(player_seq.size()) / target.size()
-    return 1.0 if is_solved() else 0.0
+	match puzzle_type:
+		PuzzleType.SEQUENCE:
+			var player_seq = puzzle_data.get("player_sequence", [])
+			var target = puzzle_data.get("sequence", [])
+			if target.size() > 0:
+				return float(player_seq.size()) / target.size()
+	return 1.0 if is_solved() else 0.0
 
 func export_state() -> Dictionary:
-    return {
-        "puzzle_id": puzzle_id,
-        "state": current_state,
-        "attempts": attempt_count,
-        "time": puzzle_timer,
-        "progress": get_progress()
-    }
+	return {
+		"puzzle_id": puzzle_id,
+		"state": current_state,
+		"attempts": attempt_count,
+		"time": puzzle_timer,
+		"progress": get_progress()
+	}
 
 func import_state(data: Dictionary) -> void:
-    attempt_count = data.get("attempts", 0)
-    puzzle_timer = data.get("time", 0.0)
-    set_state(data.get("state", PuzzleState.LOCKED))
+	attempt_count = data.get("attempts", 0)
+	puzzle_timer = data.get("time", 0.0)
+	set_state(data.get("state", PuzzleState.LOCKED))
 
 func set_puzzle_data(data: Dictionary) -> void:
-    puzzle_data = data
+	puzzle_data = data
 
 func get_puzzle_data() -> Dictionary:
-    return puzzle_data
+	return puzzle_data

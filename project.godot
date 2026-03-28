@@ -17,9 +17,9 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="迷雾绘者"
 config/description="Mist Painter - 冒险解谜游戏"
 config/version="0.1.0"
-run/main_scene="uid://c8yvxg3ulq3a6"
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
-config/icon="res://assets/ui/icon.png"
+config/icon="res://assets/ui/ui_icon_menu.png"
 
 [audio]
 
@@ -97,5 +97,4 @@ ui_pause={
 [rendering]
 
 renderer/rendering_method="mobile"
-textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.1, 0.1, 0.15, 1)

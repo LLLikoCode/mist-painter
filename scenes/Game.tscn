@@ -1,6 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://b4jv7y4v6x8a2"]
+[gd_scene load_steps=8 format=3 uid="uid://b4jv7y4v6x8a2"]
 
 [ext_resource type="Script" path="res://src/gameplay/GameController.gd" id="1_game_controller"]
+[ext_resource type="Script" path="res://src/player/PlayerController.gd" id="2_player"]
+[ext_resource type="Script" path="res://src/gameplay/MistPaintingSystem.gd" id="3_mist"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/character/player_sprite_frames.tres" id="4_sprite_frames"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 20.0
 
 [sub_resource type="Environment" id="Environment_game"]
 background_mode = 3
@@ -16,6 +21,35 @@ environment = SubResource("Environment_game")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
+
+[node name="Player" type="CharacterBody2D" parent="." groups="player" unique_name="Player"]
+script = ExtResource("2_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("CircleShape2D_player")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player"]
+sprite_frames = ExtResource("4_sprite_frames")
+
+[node name="InteractionArea" type="Area2D" parent="Player"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/InteractionArea"]
+shape = SubResource("CircleShape2D_player")
+
+[node name="MistPaintingSystem" type="Node2D" parent="." unique_name="MistPaintingSystem"]
+script = ExtResource("3_mist")
+
+[node name="MistViewport" type="SubViewport" parent="MistPaintingSystem"]
+position = Vector2(-640, -360)
+size = Vector2(1280, 720)
+
+[node name="MistSprite" type="Sprite2D" parent="MistPaintingSystem"]
+
+[node name="MistCanvasLayer" type="CanvasLayer" parent="MistPaintingSystem"]
+
+[node name="LevelContainer" type="Node2D" parent="." unique_name="LevelContainer"]
+
+[node name="Puzzles" type="Node2D" parent="." unique_name="Puzzles"]
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 layer = 10
@@ -42,6 +76,14 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 200.0
 offset_bottom = 50.0
-text = "关卡: 1"
+text = "关卡：1"
+
+[node name="MistCoverageLabel" type="Label" parent="UILayer/GameUI"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 55.0
+offset_right = 200.0
+offset_bottom = 85.0
+text = "迷雾：100%"
 
 [connection signal="pressed" from="UILayer/GameUI/PauseButton" to="." method="_on_pause_button_pressed"]

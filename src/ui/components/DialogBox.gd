@@ -22,7 +22,7 @@ var on_cancel: Callable = Callable()
 var title_label: Label = null
 var message_label: Label = null
 var confirm_button: StyledButton = null
-var cancel_button: StyledButton = null = null
+var cancel_button: StyledButton = null
 var close_button: Button = null
 var button_container: HBoxContainer = null
 

@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3 uid="uid://toast_notification"]
+
+[ext_resource type="Script" path="res://src/ui/components/ToastNotification.gd" id="1_script"]
+
+[node name="ToastNotification" type="Panel" groups=["ui_toast"]]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_right = 150.0
+offset_top = 50.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("1_script")
+
+[node name="Container" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="MessageLabel" type="Label" parent="Container"]
+layout_mode = 1
+text = "Notification"
+horizontal_alignment = 1
+vertical_alignment = 1
