@@ -156,8 +156,9 @@ func _load_scene(scene_path: String) -> void:
         # 异步加载
         ResourceLoader.load_threaded_request(scene_path)
         
-        while ResourceLoader.load_threaded_get_status(scene_path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-            var progress = ResourceLoader.load_threaded_get_status(scene_path)
+        var progress_array: Array = []
+        while ResourceLoader.load_threaded_get_status(scene_path, progress_array) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+            var progress = progress_array[0] if progress_array.size() > 0 else 0.0
             loading_progress.emit(progress)
             await get_tree().process_frame
         

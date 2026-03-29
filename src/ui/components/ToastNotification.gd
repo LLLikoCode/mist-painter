@@ -85,16 +85,18 @@ func _apply_type_style() -> void:
 
 ## 显示通知
 func show_notification() -> void:
-    visible = true
+	# 初始设置为透明
+	modulate.a = 0.0
+	visible = true
 
-    # 淡入动画
-    var tween = create_tween()
-    tween.tween_property(self, "modulate:a", 1.0, 0.3)
+	# 淡入动画
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 1.0, 0.3)
 
-    # 设置定时器
-    await get_tree().create_timer(duration).timeout
+	# 设置定时器
+	await get_tree().create_timer(duration).timeout
 
-    # 淡出动画
-    tween = create_tween()
-    tween.tween_property(self, "modulate:a", 0.0, 0.3)
-    tween.finished.connect(queue_free)
+	# 淡出动画
+	tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.3)
+	tween.finished.connect(queue_free)

@@ -54,9 +54,9 @@ enum PuzzleState {
 # 节点引用
 # ============================================
 
-@onready var interaction_area: Area2D = $InteractionArea
-@onready var visual_node: Node2D = $Visual
-@onready var hint_label: Label = $HintLabel
+@onready var interaction_area: Area2D = $InteractionArea if has_node("InteractionArea") else null
+@onready var visual_node: Node2D = $Visual if has_node("Visual") else null
+@onready var hint_label: Label = $HintLabel if has_node("HintLabel") else null
 
 # ============================================
 # 状态变量
@@ -91,11 +91,13 @@ signal progress_updated(progress: float)
 
 func _ready():
 	if interaction_area:
-		interaction_area.collision_layer = 0
-		interaction_area.collision_mask = 1
+		interaction_area.collision_layer = 4  # Interactables 层
+		interaction_area.collision_mask = 1   # Player 层
 		interaction_area.body_entered.connect(_on_player_entered)
 		interaction_area.body_exited.connect(_on_player_exited)
-	
+	else:
+		push_warning("PuzzleController '%s' has no InteractionArea node" % puzzle_name)
+
 	_initialize_puzzle()
 	print("PuzzleController initialized: %s" % puzzle_id)
 
@@ -167,6 +169,32 @@ func activate() -> void:
 	if current_state == PuzzleState.UNLOCKED or current_state == PuzzleState.FAILED:
 		set_state(PuzzleState.ACTIVE)
 		puzzle_activated.emit()
+
+## 解决谜题
+func solve_puzzle() -> void:
+	if current_state == PuzzleState.SOLVED:
+		return
+
+	set_state(PuzzleState.SOLVED)
+	puzzle_solved.emit()
+	print("Puzzle solved: %s" % puzzle_name)
+
+	# 通知连接的谜题
+	_notify_connected_puzzles()
+
+	# 更新视觉
+	_update_visual_for_solved()
+
+## 更新视觉效果（解决状态）
+func _update_visual_for_solved() -> void:
+	if visual_node:
+		# 改变颜色表示解决
+		if visual_node is ColorRect:
+			visual_node.color = Color(0.2, 0.8, 0.4, 1)
+
+	if hint_label:
+		hint_label.text = "完成!"
+		hint_label.visible = false
 
 func reset_puzzle() -> void:
 	attempt_count = 0
@@ -292,11 +320,12 @@ func _handle_switch_input(input_data: Dictionary) -> void:
 
 func _handle_sequence_input(input_data: Dictionary) -> void:
 	var value = input_data.get("value", 0)
-	var player_seq = puzzle_data.get("player_sequence", [])
-	var target_seq = puzzle_data.get("sequence", [])
-	
+	var player_seq: Array = puzzle_data.get("player_sequence", [])
+	var target_seq: Array = puzzle_data.get("sequence", [])
+
 	player_seq.append(value)
-	
+	puzzle_data["player_sequence"] = player_seq  # 确保更新回puzzle_data
+
 	if player_seq.size() >= target_seq.size():
 		check_solution()
 	else:
@@ -309,16 +338,18 @@ func _handle_sequence_input(input_data: Dictionary) -> void:
 
 func _handle_path_input(input_data: Dictionary) -> void:
 	var point = input_data.get("point", Vector2.ZERO)
-	var drawn_path = puzzle_data.get("drawn_path", [])
+	var drawn_path: Array = puzzle_data.get("drawn_path", [])
 	drawn_path.append(point)
+	puzzle_data["drawn_path"] = drawn_path  # 确保更新回puzzle_data
 
 func _handle_pressure_input(input_data: Dictionary) -> void:
 	var plate_id = input_data.get("plate_id", "")
-	var current_order = puzzle_data.get("current_order", [])
-	var target = puzzle_data.get("activation_order", [])
-	
+	var current_order: Array = puzzle_data.get("current_order", [])
+	var target: Array = puzzle_data.get("activation_order", [])
+
 	current_order.append(plate_id)
-	
+	puzzle_data["current_order"] = current_order  # 确保更新回puzzle_data
+
 	if current_order.size() <= target.size():
 		var index = current_order.size() - 1
 		if current_order[index] != target[index]:
@@ -326,7 +357,7 @@ func _handle_pressure_input(input_data: Dictionary) -> void:
 			current_input.clear()
 			_reset_puzzle_data()
 			return
-	
+
 	if current_order.size() >= target.size():
 		check_solution()
 
@@ -380,12 +411,21 @@ func on_connected_puzzle_solved(_solved_puzzle: PuzzleController) -> void:
 # ============================================
 
 func _on_player_entered(body: Node) -> void:
-	if body is PlayerController and current_state == PuzzleState.UNLOCKED:
-		pass
+	if body is PlayerController:
+		if current_state == PuzzleState.UNLOCKED or current_state == PuzzleState.ACTIVE:
+			# 压力板类型自动解决
+			if puzzle_type == PuzzleType.PRESSURE_PLATE:
+				solve_puzzle()
+		# 显示提示
+		if hint_label and not hint_text.is_empty():
+			hint_label.text = hint_text
+			hint_label.visible = true
 
 func _on_player_exited(body: Node) -> void:
-	if body.name == "Player":
-		pass
+	if body is PlayerController:
+		# 隐藏提示
+		if hint_label:
+			hint_label.visible = false
 
 func interact(player: Node) -> void:
 	if current_state == PuzzleState.LOCKED:

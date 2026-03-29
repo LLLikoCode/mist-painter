@@ -16,8 +16,8 @@ const MIST_TEXTURE_SIZE: Vector2i = Vector2i(1280, 720)
 ## 默认笔刷大小
 const DEFAULT_BRUSH_SIZE: float = 20.0
 
-## 迷雾颜色
-const MIST_COLOR: Color = Color(0.1, 0.1, 0.15, 0.95)
+## 迷雾颜色 - 使用更明显的深蓝色迷雾
+const MIST_COLOR: Color = Color(0.05, 0.05, 0.1, 0.98)
 
 ## 迷雾消散颜色（完全透明）
 const CLEAR_COLOR: Color = Color(0.0, 0.0, 0.0, 0.0)
@@ -57,7 +57,7 @@ const DIRTY_RECT_MERGE_THRESHOLD: int = 32
 # ============================================
 
 @onready var mist_viewport: SubViewport = $MistViewport
-@onready var mist_sprite: Sprite2D = $MistSprite
+@onready var mist_sprite: Sprite2D = $MistCanvasLayer/MistSprite
 @onready var canvas_layer: CanvasLayer = $MistCanvasLayer
 
 # ============================================
@@ -170,15 +170,21 @@ func _initialize_mist() -> void:
 	# 创建迷雾图像
 	mist_image = Image.create(MIST_TEXTURE_SIZE.x, MIST_TEXTURE_SIZE.y, false, Image.FORMAT_RGBA8)
 	mist_image.fill(MIST_COLOR)
-	
+
 	# 创建纹理
 	mist_texture = ImageTexture.create_from_image(mist_image)
-	
+
 	# 设置精灵
 	if mist_sprite:
 		mist_sprite.texture = mist_texture
+		# 确保精灵位于屏幕中央，覆盖整个屏幕
 		mist_sprite.position = Vector2(MIST_TEXTURE_SIZE.x / 2, MIST_TEXTURE_SIZE.y / 2)
-	
+		mist_sprite.centered = true
+
+	# 确保 CanvasLayer 在正确的层级
+	if canvas_layer:
+		canvas_layer.layer = 5  # 在游戏世界之上，UI之下
+
 	total_pixels = MIST_TEXTURE_SIZE.x * MIST_TEXTURE_SIZE.y
 	cleared_pixels = 0
 	mist_coverage = 1.0
@@ -404,7 +410,7 @@ func _apply_brush_optimized(center: Vector2, radius: float) -> Dictionary:
 					var brush_y = int(y - (center.y - radius))
 					
 					if brush_x >= 0 and brush_x < brush_size_int and brush_y >= 0 and brush_y < brush_size_int:
-						var brush_alpha = cached_brush.get_pixel(brush_x, brush_y).a
+						var brush_alpha = cached_brush.get_pixel(clamp(brush_x, 0, brush_size_int - 1), clamp(brush_y, 0, brush_size_int - 1)).a
 						
 						if brush_alpha > 0:
 							# 减少迷雾（增加透明度）

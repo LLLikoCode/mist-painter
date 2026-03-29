@@ -1,0 +1,8 @@
+res://src/gameplay/GameController.gd
+res://src/gameplay/PuzzleController.gd
+res://src/player/PlayerController.gd
+res://src/core/SceneManager.gd
+res://src/gameplay/MistPaintingSystem.gd
+res://src/ui/components/DialogBox.gd
+res://src/ui/components/ToastNotification.gd
+res://src/ui/components/HUD.gd

@@ -123,8 +123,10 @@ func _create_layout() -> void:
 func _apply_style() -> void:
     var theme_manager = UIManager.instance.theme_manager if UIManager.instance else null
     if theme_manager == null:
+        # 使用默认样式
+        _apply_default_style()
         return
-    
+
     # 面板样式
     var panel_style = StyleBoxFlat.new()
     panel_style.bg_color = theme_manager.get_color("surface")
@@ -140,16 +142,38 @@ func _apply_style() -> void:
     panel_style.shadow_color = theme_manager.get_color("shadow")
     panel_style.shadow_size = 8
     add_theme_stylebox_override("panel", panel_style)
-    
+
     # 标题样式
     title_label.add_theme_color_override("font_color", theme_manager.get_color("text"))
-    
+
     # 消息样式
     message_label.add_theme_color_override("font_color", theme_manager.get_color("text_secondary"))
-    
+
     # 关闭按钮样式
     if close_button:
         close_button.add_theme_color_override("font_color", theme_manager.get_color("text_secondary"))
+
+## 应用默认样式（当 ThemeManager 不可用时）
+func _apply_default_style() -> void:
+    # 面板样式
+    var panel_style = StyleBoxFlat.new()
+    panel_style.bg_color = Color(0.15, 0.15, 0.18)
+    panel_style.border_color = Color(0.3, 0.3, 0.35)
+    panel_style.set_border_width_all(2)
+    panel_style.set_corner_radius_all(12)
+    panel_style.shadow_color = Color(0, 0, 0, 0.3)
+    panel_style.shadow_size = 8
+    add_theme_stylebox_override("panel", panel_style)
+
+    # 标题样式
+    title_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95))
+
+    # 消息样式
+    message_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
+
+    # 关闭按钮样式
+    if close_button:
+        close_button.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
 
 func _update_content() -> void:
     title_label.text = title

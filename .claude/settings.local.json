@@ -21,7 +21,14 @@
       "Bash(rm -f assets/**/*.import)",
       "Bash(rm -f assets/**/**/*.import)",
       "Bash(where Godot)",
-      "Bash(find 'C:/Program Files' -name Godot*.exe)"
+      "Bash(find 'C:/Program Files' -name Godot*.exe)",
+      "Bash(\"C:/Program Files \\(x86\\)/Steam/steamapps/common/Godot Engine/Godot_v4.3-stable_win64.exe\" --headless --check-only --quit)",
+      "Bash(sed -i 's/interaction_area\\\\.body_entered\\\\.connect/interaction_area.area_entered.connect/' \"D:/GodotProject/mist-painter/src/player/PlayerController.gd\")",
+      "Bash(sed -i 's/interaction_area\\\\.body_exited\\\\.connect/interaction_area.area_exited.connect/' \"D:/GodotProject/mist-painter/src/player/PlayerController.gd\")",
+      "Bash(sed -i 's/func _on_interaction_area_entered\\(body: Node\\)/func _on_interaction_area_entered\\(area: Area2D\\)/' \"D:/GodotProject/mist-painter/src/player/PlayerController.gd\")",
+      "Bash(sed -i 's/func _on_interaction_area_exited\\(body: Node\\)/func _on_interaction_area_exited\\(area: Area2D\\)/' \"D:/GodotProject/mist-painter/src/player/PlayerController.gd\")",
+      "Bash(sed -i 's/current_interactable = body/current_interactable = area/g' \"D:/GodotProject/mist-painter/src/player/PlayerController.gd\")",
+      "Bash(sed -i 's/if body ==/if area ==/g' \"D:/GodotProject/mist-painter/src/player/PlayerController.gd\")"
     ]
   }
 }
