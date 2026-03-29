@@ -343,37 +343,51 @@
 
 ## 9. 文档索引
 
-### 核心系统文档
-- [迷雾绘制系统](design/mist-painting-system.md)
-- [迷宫生成系统](design/maze-generation.md)
-- [地图记忆系统](design/map-memory-system.md)
-- [玩家资源系统](design/player-stats.md)
-- [光源系统](design/light-system.md)
-- [心理状态系统](design/mental-state-system.md)
+### 核心玩法系统 (`design/gameplay/`)
+- [迷雾绘制系统](design/gameplay/mist-painting-system.md)
+- [迷宫生成系统](design/gameplay/maze-generation.md)
+- [地图记忆系统](design/gameplay/map-memory-system.md)
+- [光源系统](design/gameplay/light-system.md)
+- [心理状态系统](design/gameplay/mental-state-system.md)
+- [游戏循环设计](design/gameplay/game-loop-design.md)
+- [关卡过渡设计](design/gameplay/level-transition-design.md)
+- [扩展功能设计](design/gameplay/expansion-features.md)
 
-### 进阶系统文档
-- [职业系统](design/class-system.md)
-- [难度系统](design/difficulty-system.md)
+### 玩家系统 (`design/player/`)
+- [玩家资源系统](design/player/player-stats.md)
+- [职业系统](design/player/class-system.md)
+
+### 技术文档 (`design/technical/`)
+- [技术架构](design/technical/tech-architecture.md)
+- [核心接口](design/technical/core-interfaces.md)
+- [UI系统设计](design/technical/ui-system-design.md)
+- [音频系统](design/technical/audio-system.md)
+- [CI/CD配置](design/technical/ci-cd-setup.md)
+
+### 系统设计 (`design/`)
+- [难度系统](design/difficulty-curve.md)
 - [进度系统](design/progression-system.md)
-- [游戏循环设计](design/game-loop-design.md)
-- [关卡过渡设计](design/level-transition-design.md)
-
-### 技术文档
-- [技术架构](design/tech-architecture.md)
-- [核心接口](design/core-interfaces.md)
-- [存档系统](design/systems/save-system.md)
 - [成就系统](design/achievement-design.md)
-- [音频系统](design/audio-system.md)
+- [存档系统](design/systems/save-system.md)
 
-### 美术文档
+### 美术文档 (`design/art/`)
 - [美术风格指南](design/art/art-style-guide.md)
-- [角色精灵规范](design/character-sprite-spec.md)
+- [角色精灵规范](design/art/character-sprite-spec.md)
 - [Tileset设计](design/art/tileset-design.md)
 - [特效设计](design/art/effects_design_doc.md)
 
-### 性能文档
+### 性能优化 (`performance/`)
 - [迷雾优化](performance/mist-optimization.md)
 - [性能测试数据](performance/performance-test-data.md)
+
+### 参考文档 (`design/reference/`)
+- [核心玩法参考](design/reference/01-core-gameplay.md)
+- [地图绘制参考](design/reference/02-map-drawing.md)
+- [迷宫生成参考](design/reference/03-maze-generation.md)
+- [数值平衡参考](design/reference/04-game-balance.md)
+- [美术风格参考](design/reference/05-art-style.md)
+- [扩展玩法参考](design/reference/06-expansion.md)
+- [技术规格参考](design/reference/07-technical-spec.md)
 
 ---
 
