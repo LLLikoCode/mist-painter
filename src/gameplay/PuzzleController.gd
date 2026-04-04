@@ -189,8 +189,9 @@ func solve_puzzle() -> void:
 func _update_visual_for_solved() -> void:
 	if visual_node:
 		# 改变颜色表示解决
-		if visual_node is ColorRect:
-			visual_node.color = Color(0.2, 0.8, 0.4, 1)
+		var color_rect = visual_node.get_node_or_null("ColorRect") if visual_node.has_node("ColorRect") else null
+		if color_rect and color_rect is ColorRect:
+			color_rect.color = Color(0.2, 0.8, 0.4, 1)
 
 	if hint_label:
 		hint_label.text = "完成!"

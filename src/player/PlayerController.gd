@@ -23,6 +23,17 @@ const ANIM_IDLE_THRESHOLD: float = 10.0
 ## 墨水消耗率 (每次绘制消耗)
 const INK_COST_PER_DRAW: float = 0.5
 
+## 体力消耗率 (基于设计文档)
+const STAMINA_COST_MOVE: float = 1.0      # 移动1格消耗
+const STAMINA_COST_SPRINT: float = 2.0    # 奔跑1格消耗
+const STAMINA_COST_DRAW: float = 5.0      # 绘制地图消耗
+
+## 体力恢复率
+const STAMINA_RECOVERY_IDLE: float = 2.0  # 静止时每秒恢复
+
+## 格子大小 (用于计算体力消耗)
+const CELL_SIZE: float = 50.0
+
 # ============================================
 # 导出变量
 # ============================================
@@ -82,6 +93,12 @@ var paint_timer: float = 0.0
 ## 当前可交互对象
 var current_interactable: Node = null
 
+## 累计移动距离 (用于计算体力消耗)
+var accumulated_distance: float = 0.0
+
+## 上一次位置 (用于计算移动距离)
+var last_position: Vector2 = Vector2.ZERO
+
 # ============================================
 # 信号
 # ============================================
@@ -93,6 +110,8 @@ signal paint_started(position: Vector2)
 signal paint_ended(position: Vector2)
 signal paint_moved(position: Vector2)
 signal ink_consumed(amount: float)
+signal stamina_consumed(amount: float)
+signal fatigue_state_changed(state: int, state_name: String)
 signal player_died
 
 # ============================================
@@ -128,6 +147,11 @@ func _init_stats() -> void:
 	# 连接资源信号
 	stats.player_died.connect(_on_player_died)
 	stats.ink_depleted.connect(_on_ink_depleted)
+	stats.stamina_depleted.connect(_on_stamina_depleted)
+	stats.fatigue_state_changed.connect(_on_fatigue_state_changed)
+
+	# 初始化位置追踪
+	last_position = global_position
 
 func _physics_process(delta: float):
 	# 更新计时器
@@ -136,11 +160,14 @@ func _physics_process(delta: float):
 	# 处理输入
 	_handle_input(delta)
 
-	# 应用移动
+	# 应用移动 (含体力消耗)
 	_apply_movement(delta)
 
 	# 更新动画
 	_update_animation_based_on_velocity()
+
+	# 处理体力恢复
+	_handle_stamina_recovery(delta)
 
 func _process(_delta: float):
 	# 处理迷雾绘制输入
@@ -206,6 +233,25 @@ func _on_ink_depleted() -> void:
 		is_painting = false
 		paint_ended.emit(global_position)
 
+## 体力耗尽处理
+func _on_stamina_depleted() -> void:
+	# 体力耗尽时停止绘制和移动惩罚
+	if is_painting:
+		is_painting = false
+		paint_ended.emit(global_position)
+	print("Stamina depleted! Player exhausted.")
+
+## 疲劳状态变化处理
+func _on_fatigue_state_changed(state: int) -> void:
+	var state_name = stats.get_fatigue_state_name() if stats else "未知"
+	fatigue_state_changed.emit(state, state_name)
+	print("Fatigue state changed: %s" % state_name)
+
+## 处理体力恢复 (静止时)
+func _handle_stamina_recovery(delta: float) -> void:
+	# 体力不自动恢复 - 需要使用食物道具
+	pass
+
 # ============================================
 # 输入处理
 # ============================================
@@ -235,15 +281,33 @@ func _handle_paint_input() -> void:
 	if stats and stats.is_dead:
 		return
 
+	# 检查疲劳状态是否允许绘制
+	if stats:
+		var fatigue_effects = stats.get_fatigue_effects()
+		if not fatigue_effects.get("can_draw", true):
+			# 疲劳状态下无法绘制
+			if is_painting:
+				is_painting = false
+				var mouse_pos = get_global_mouse_position()
+				paint_ended.emit(mouse_pos)
+			return
+
 	var is_paint_pressed = Input.is_action_pressed("paint_mist")
 
 	# 获取鼠标在世界中的位置（用于迷雾绘制）
 	var mouse_world_pos = get_global_mouse_position()
 
 	if is_paint_pressed and paint_timer <= 0:
-		# 检查墨水是否足够
+		# 检查墨水和体力是否足够
 		if not has_enough_ink(INK_COST_PER_DRAW):
 			# 墨水不足，无法绘制
+			if is_painting:
+				is_painting = false
+				paint_ended.emit(mouse_world_pos)
+			return
+
+		if stats and not stats.has_enough_stamina(STAMINA_COST_DRAW):
+			# 体力不足，无法绘制
 			if is_painting:
 				is_painting = false
 				paint_ended.emit(mouse_world_pos)
@@ -255,9 +319,12 @@ func _handle_paint_input() -> void:
 		else:
 			paint_moved.emit(mouse_world_pos)
 
-		# 消耗墨水
+		# 消耗墨水和体力
 		if consume_ink(INK_COST_PER_DRAW):
 			ink_consumed.emit(INK_COST_PER_DRAW * ink_cost_multiplier)
+
+		if stats and stats.consume_stamina(STAMINA_COST_DRAW):
+			stamina_consumed.emit(STAMINA_COST_DRAW)
 
 		paint_timer = paint_cooldown
 	elif not is_paint_pressed and is_painting:
@@ -270,14 +337,35 @@ func _handle_paint_input() -> void:
 
 ## 应用移动
 func _apply_movement(delta: float) -> void:
-	var target_speed = sprint_speed if is_sprinting else move_speed
+	# 获取疲劳效果
+	var fatigue_effects = stats.get_fatigue_effects() if stats else {}
+	var speed_modifier = fatigue_effects.get("speed_modifier", 1.0)
+
+	var target_speed = (sprint_speed if is_sprinting else move_speed) * speed_modifier
 
 	if current_direction != Vector2.ZERO:
 		# 加速
 		velocity = velocity.move_toward(current_direction * target_speed, acceleration * delta)
+
+		# 计算移动距离并消耗体力
+		if stats and stats.current_stamina > 0:
+			var move_distance = velocity.length() * delta
+			accumulated_distance += move_distance
+
+			# 每移动一格(CELL_SIZE)消耗体力
+			if accumulated_distance >= CELL_SIZE:
+				var cells_moved = accumulated_distance / CELL_SIZE
+				var stamina_cost = STAMINA_COST_SPRINT if is_sprinting else STAMINA_COST_MOVE
+				var total_cost = cells_moved * stamina_cost
+
+				if stats.consume_stamina(total_cost):
+					stamina_consumed.emit(total_cost)
+
+				accumulated_distance = accumulated_distance - (cells_moved * CELL_SIZE)
 	else:
 		# 减速
 		velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
+		accumulated_distance = 0.0  # 停止时重置累计距离
 
 	# 移动并滑动
 	move_and_slide()
@@ -285,6 +373,9 @@ func _apply_movement(delta: float) -> void:
 	# 发送移动信号
 	if velocity.length() > ANIM_IDLE_THRESHOLD:
 		moved.emit(global_position, velocity)
+
+	# 更新上次位置
+	last_position = global_position
 
 ## 根据速度更新动画
 func _update_animation_based_on_velocity() -> void:
@@ -429,3 +520,37 @@ func is_painting_mist() -> bool:
 ## 获取当前速度
 func get_current_speed() -> float:
 	return velocity.length()
+
+## 消耗体力
+func consume_stamina(amount: float) -> bool:
+	if stats:
+		return stats.consume_stamina(amount)
+	return false
+
+## 恢复体力
+func restore_stamina(amount: float) -> void:
+	if stats:
+		stats.restore_stamina(amount)
+
+## 获取当前体力
+func get_current_stamina() -> float:
+	if stats:
+		return stats.current_stamina
+	return 0.0
+
+## 获取疲劳状态
+func get_fatigue_state() -> int:
+	if stats:
+		return stats.current_fatigue_state
+	return 0
+
+## 获取疲劳效果
+func get_fatigue_effects() -> Dictionary:
+	if stats:
+		return stats.get_fatigue_effects()
+	return {
+		"speed_modifier": 1.0,
+		"draw_error_modifier": 0.0,
+		"vision_penalty": 0,
+		"can_draw": true
+	}

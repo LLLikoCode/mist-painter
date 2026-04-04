@@ -16,8 +16,8 @@ const MIST_TEXTURE_SIZE: Vector2i = Vector2i(1280, 720)
 ## 默认笔刷大小
 const DEFAULT_BRUSH_SIZE: float = 20.0
 
-## 迷雾颜色 - 使用更明显的深蓝色迷雾
-const MIST_COLOR: Color = Color(0.05, 0.05, 0.1, 0.98)
+## 迷雾颜色 - 暂时降低透明度以便测试
+const MIST_COLOR: Color = Color(0.05, 0.05, 0.1, 0.6)  # 降低透明度到60%以便看到迷宫
 
 ## 迷雾消散颜色（完全透明）
 const CLEAR_COLOR: Color = Color(0.0, 0.0, 0.0, 0.0)

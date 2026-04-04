@@ -1,19 +1,22 @@
-[gd_scene load_steps=8 format=3 uid="uid://b4jv7y4v6x8a2"]
+[gd_scene load_steps=10 format=3 uid="uid://b4jv7y4v6x8a2"]
 
 [ext_resource type="Script" path="res://src/gameplay/GameController.gd" id="1_game_controller"]
 [ext_resource type="Script" path="res://src/player/PlayerController.gd" id="2_player"]
 [ext_resource type="Script" path="res://src/gameplay/MistPaintingSystem.gd" id="3_mist"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/character/player_sprite_frames.tres" id="4_sprite_frames"]
 [ext_resource type="Script" path="res://src/ui/components/HUD.gd" id="5_hud"]
+[ext_resource type="Script" path="res://src/gameplay/VisionSystem.gd" id="6_vision"]
+[ext_resource type="Script" path="res://src/generation/MazeRenderer.gd" id="7_maze_renderer"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 20.0
 
 [sub_resource type="Environment" id="Environment_game"]
 background_mode = 3
+background_color = Color(0.1, 0.08, 0.15, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.1, 0.1, 0.15, 1)
-ambient_light_energy = 0.5
+ambient_light_color = Color(0.2, 0.15, 0.25, 1)
+ambient_light_energy = 1.5
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game_controller")
@@ -22,11 +25,14 @@ script = ExtResource("1_game_controller")
 environment = SubResource("Environment_game")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(640, 360)
+position = Vector2(100, 100)
 current = true
+position_smoothing_enabled = false
+position_smoothing_speed = 10.0
 
 [node name="Player" type="CharacterBody2D" parent="." groups="player" unique_name="Player"]
-position = Vector2(150, 360)
+position = Vector2(100, 100)
+z_index = 50
 script = ExtResource("2_player")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
@@ -34,6 +40,7 @@ shape = SubResource("CircleShape2D_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player"]
 sprite_frames = ExtResource("4_sprite_frames")
+z_index = 20
 
 [node name="InteractionArea" type="Area2D" parent="Player"]
 
@@ -41,25 +48,44 @@ sprite_frames = ExtResource("4_sprite_frames")
 shape = SubResource("CircleShape2D_player")
 
 [node name="MistPaintingSystem" type="Node2D" parent="." unique_name="MistPaintingSystem"]
+visible = false
 script = ExtResource("3_mist")
 
+[node name="MistViewport" type="SubViewport" parent="MistPaintingSystem"]
+size = Vector2(1280, 720)
+render_target_update_mode = 1
+
 [node name="MistCanvasLayer" type="CanvasLayer" parent="MistPaintingSystem"]
+visible = false
 layer = 5
 
 [node name="MistSprite" type="Sprite2D" parent="MistPaintingSystem/MistCanvasLayer"]
 position = Vector2(640, 360)
 scale = Vector2(1, 1)
 
-[node name="MistViewport" type="SubViewport" parent="MistPaintingSystem"]
-size = Vector2(1280, 720)
-render_target_update_mode = 1
+[node name="VisionSystem" type="Node2D" parent="." unique_name="VisionSystem"]
+script = ExtResource("6_vision")
 
 [node name="LevelContainer" type="Node2D" parent="." unique_name="LevelContainer"]
+position = Vector2(0, 0)
+z_index = 1
+
+[node name="BackgroundRect" type="ColorRect" parent="LevelContainer"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 2000.0
+offset_bottom = 2000.0
+color = Color(0.15, 0.12, 0.2, 1)
+
+[node name="MazeRenderer" type="Node2D" parent="LevelContainer" unique_name="MazeRenderer"]
+position = Vector2(0, 0)
+z_index = 10
+script = ExtResource("7_maze_renderer")
 
 [node name="Puzzles" type="Node2D" parent="." unique_name="Puzzles"]
 
 [node name="UILayer" type="CanvasLayer" parent="."]
-layer = 10
+layer = 100
 
 [node name="HUD" type="Control" parent="UILayer"]
 layout_mode = 3

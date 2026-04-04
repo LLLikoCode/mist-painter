@@ -24,6 +24,16 @@ const DEFAULT_START_INK: float = 50.0
 ## 墨水消耗率 (每像素绘制消耗)
 const INK_COST_PER_PIXEL: float = 0.001
 
+## 体力 (Stamina) - 用于移动和动作
+const DEFAULT_MAX_STAMINA: float = 100.0
+const STAMINA_MAX_LIMIT: float = 200.0
+
+## 疲劳状态阈值
+const FATIGUE_THRESHOLD_NORMAL: float = 0.70    # 70%以上: 正常
+const FATIGUE_THRESHOLD_TIRED: float = 0.40     # 40-70%: 疲劳
+const FATIGUE_THRESHOLD_EXHAUSTED: float = 0.20 # 20-40%: 精疲力竭
+const FATIGUE_THRESHOLD_CRITICAL: float = 0.10  # 10-20%: 濒死
+
 # ============================================
 # 导出变量
 # ============================================
@@ -45,6 +55,13 @@ const INK_COST_PER_PIXEL: float = 0.001
 
 @export var ink_cost_multiplier: float = 1.0
 
+@export_group("Stamina Settings")
+@export var max_stamina: float = DEFAULT_MAX_STAMINA
+@export var current_stamina: float = DEFAULT_MAX_STAMINA:
+	set = set_current_stamina
+
+@export var stamina_cost_multiplier: float = 1.0
+
 # ============================================
 # 状态变量
 # ============================================
@@ -62,9 +79,12 @@ var is_invincible: bool = false
 signal hp_changed(current: float, max_hp: float)
 signal sp_changed(current: float, max_sp: float)
 signal ink_changed(current: float, max_ink: float)
+signal stamina_changed(current: float, max_stamina: float)
+signal fatigue_state_changed(state: int)  # 0=正常, 1=疲劳, 2=精疲力竭, 3=濒死
 signal hp_depleted
 signal sp_depleted
 signal ink_depleted
+signal stamina_depleted
 signal player_died
 signal player_revived
 signal stats_updated
@@ -73,9 +93,14 @@ signal stats_updated
 # 生命周期
 # ============================================
 
+## 当前疲劳状态 (0=正常, 1=疲劳, 2=精疲力竭, 3=濒死)
+var current_fatigue_state: int = 0
+
 func _ready():
 	current_hp = max_hp
 	current_sp = max_sp
+	current_stamina = max_stamina
+	current_fatigue_state = _calculate_fatigue_state()
 	print("PlayerStats initialized")
 
 # ============================================
@@ -249,6 +274,132 @@ func try_consume_for_drawing(pixel_count: int, brush_size: float) -> bool:
 	return consume_ink(cost)
 
 # ============================================
+# 体力 (Stamina) 方法
+# ============================================
+
+## 设置当前体力
+func set_current_stamina(value: float) -> void:
+	var old_value = current_stamina
+	current_stamina = clamp(value, 0.0, max_stamina)
+
+	if abs(current_stamina - old_value) > 0.01:
+		stamina_changed.emit(current_stamina, max_stamina)
+		stats_updated.emit()
+
+		# 检查疲劳状态变化
+		var new_fatigue_state = _calculate_fatigue_state()
+		if new_fatigue_state != current_fatigue_state:
+			current_fatigue_state = new_fatigue_state
+			fatigue_state_changed.emit(current_fatigue_state)
+
+		if current_stamina <= 0 and old_value > 0:
+			stamina_depleted.emit()
+
+## 消耗体力
+func consume_stamina(amount: float) -> bool:
+	var actual_cost = amount * stamina_cost_multiplier
+
+	if current_stamina >= actual_cost:
+		set_current_stamina(current_stamina - actual_cost)
+		return true
+	return false
+
+## 恢复体力
+func restore_stamina(amount: float) -> void:
+	set_current_stamina(current_stamina + amount)
+
+## 恢复体力百分比
+func restore_stamina_percentage(percentage: float) -> void:
+	restore_stamina(max_stamina * percentage / 100.0)
+
+## 设置最大体力
+func set_max_stamina(value: float, fill_to_full: bool = false) -> void:
+	max_stamina = clamp(value, 1.0, STAMINA_MAX_LIMIT)
+
+	if fill_to_full:
+		current_stamina = max_stamina
+
+	stamina_changed.emit(current_stamina, max_stamina)
+
+## 获取体力百分比
+func get_stamina_percentage() -> float:
+	return current_stamina / max_stamina if max_stamina > 0 else 0.0
+
+## 检查是否有足够体力
+func has_enough_stamina(amount: float) -> bool:
+	return current_stamina >= amount * stamina_cost_multiplier
+
+## 计算疲劳状态
+func _calculate_fatigue_state() -> int:
+	var percentage = get_stamina_percentage()
+	if percentage >= FATIGUE_THRESHOLD_NORMAL:
+		return 0  # 正常
+	elif percentage >= FATIGUE_THRESHOLD_TIRED:
+		return 1  # 疲劳
+	elif percentage >= FATIGUE_THRESHOLD_EXHAUSTED:
+		return 2  # 精疲力竭
+	elif percentage >= FATIGUE_THRESHOLD_CRITICAL:
+		return 3  # 濒死
+	else:
+		return 4  # 昏迷 (体力为0)
+
+## 获取疲劳状态名称
+func get_fatigue_state_name() -> String:
+	match current_fatigue_state:
+		0: return "精力充沛"
+		1: return "疲劳"
+		2: return "精疲力竭"
+		3: return "濒死"
+		4: return "昏迷"
+	return "未知"
+
+## 获取疲劳状态效果
+func get_fatigue_effects() -> Dictionary:
+	## 返回疲劳状态的效果参数
+	match current_fatigue_state:
+		0: # 正常
+			return {
+				"speed_modifier": 1.0,
+				"draw_error_modifier": 0.0,
+				"vision_penalty": 0,
+				"can_draw": true
+			}
+		1: # 疲劳 (40-70%)
+			return {
+				"speed_modifier": 0.9,
+				"draw_error_modifier": 0.1,
+				"vision_penalty": 0,
+				"can_draw": true
+			}
+		2: # 精疲力竭 (20-40%)
+			return {
+				"speed_modifier": 0.75,
+				"draw_error_modifier": 0.25,
+				"vision_penalty": 1,
+				"can_draw": true
+			}
+		3: # 濒死 (10-20%)
+			return {
+				"speed_modifier": 0.5,
+				"draw_error_modifier": 0.5,
+				"vision_penalty": 2,
+				"can_draw": false
+			}
+		4: # 昏迷 (0%)
+			return {
+				"speed_modifier": 0.0,
+				"draw_error_modifier": 1.0,
+				"vision_penalty": 3,
+				"can_draw": false
+			}
+	return {
+		"speed_modifier": 1.0,
+		"draw_error_modifier": 0.0,
+		"vision_penalty": 0,
+		"can_draw": true
+	}
+
+# ============================================
 # 综合方法
 # ============================================
 
@@ -260,10 +411,13 @@ func reset_stats() -> void:
 	current_hp = max_hp
 	current_sp = max_sp
 	current_ink = DEFAULT_START_INK
+	current_stamina = max_stamina
+	current_fatigue_state = 0
 
 	hp_changed.emit(current_hp, max_hp)
 	sp_changed.emit(current_sp, max_sp)
 	ink_changed.emit(current_ink, max_ink)
+	stamina_changed.emit(current_stamina, max_stamina)
 	stats_updated.emit()
 
 	print("PlayerStats reset")
@@ -274,19 +428,25 @@ func full_restore() -> void:
 	current_hp = max_hp
 	current_sp = max_sp
 	current_ink = max_ink
+	current_stamina = max_stamina
+	current_fatigue_state = 0
 
 	hp_changed.emit(current_hp, max_hp)
 	sp_changed.emit(current_sp, max_sp)
 	ink_changed.emit(current_ink, max_ink)
+	stamina_changed.emit(current_stamina, max_stamina)
 	stats_updated.emit()
 
-## 休息点恢复 (设计文档: 恢复50% HP，完全恢复SP)
+## 休息点恢复 (设计文档: 恢复50% HP，完全恢复SP和体力)
 func rest_restore() -> void:
 	heal_percentage(50.0)
 	current_sp = max_sp
+	current_stamina = max_stamina
+	current_fatigue_state = 0
 	sp_changed.emit(current_sp, max_sp)
+	stamina_changed.emit(current_stamina, max_stamina)
 	stats_updated.emit()
-	print("Player rested: HP +50%, SP fully restored")
+	print("Player rested: HP +50%, SP and Stamina fully restored")
 
 ## 复活
 func revive(restore_hp_percentage: float = 100.0) -> void:
@@ -313,6 +473,10 @@ func export_state() -> Dictionary:
 		"max_ink": max_ink,
 		"current_ink": current_ink,
 		"ink_cost_multiplier": ink_cost_multiplier,
+		"max_stamina": max_stamina,
+		"current_stamina": current_stamina,
+		"stamina_cost_multiplier": stamina_cost_multiplier,
+		"current_fatigue_state": current_fatigue_state,
 		"is_dead": is_dead
 	}
 
@@ -325,11 +489,16 @@ func import_state(data: Dictionary) -> void:
 	max_ink = data.get("max_ink", DEFAULT_MAX_INK)
 	current_ink = data.get("current_ink", DEFAULT_START_INK)
 	ink_cost_multiplier = data.get("ink_cost_multiplier", 1.0)
+	max_stamina = data.get("max_stamina", DEFAULT_MAX_STAMINA)
+	current_stamina = data.get("current_stamina", max_stamina)
+	stamina_cost_multiplier = data.get("stamina_cost_multiplier", 1.0)
+	current_fatigue_state = data.get("current_fatigue_state", 0)
 	is_dead = data.get("is_dead", false)
 
 	hp_changed.emit(current_hp, max_hp)
 	sp_changed.emit(current_sp, max_sp)
 	ink_changed.emit(current_ink, max_ink)
+	stamina_changed.emit(current_stamina, max_stamina)
 	stats_updated.emit()
 
 ## 获取状态摘要
@@ -338,6 +507,8 @@ func get_status_summary() -> Dictionary:
 		"hp": "%d/%d" % [int(current_hp), int(max_hp)],
 		"sp": "%d/%d" % [int(current_sp), int(max_sp)],
 		"ink": "%d/%d" % [int(current_ink), int(max_ink)],
+		"stamina": "%d/%d" % [int(current_stamina), int(max_stamina)],
+		"fatigue_state": get_fatigue_state_name(),
 		"is_dead": is_dead,
 		"is_invincible": is_invincible
 	}
